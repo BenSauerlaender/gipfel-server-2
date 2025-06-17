@@ -35,7 +35,7 @@ const resolveDifficulty = (s) => {
       jump: undefined,
       RP: undefined,
       normal: undefined,
-      unsupported: undefined
+      withoutSupport: undefined
     }
   }
   let symbols = s.split(/[\s\/]+/)
@@ -52,7 +52,7 @@ const resolveDifficulty = (s) => {
     }else if(JUMP_SCALA.includes(symbol)){
       res.difficulty.jump = symbol
     }else if(SCALA.map(s => "("+s+")").includes(symbol)){
-      res.difficulty.unsupported = symbol.slice(1,-1)
+      res.difficulty.withoutSupport = symbol.slice(1,-1)
     }else if(symbol == "RP"){
       symbol = symbols.shift()
       if(SCALA.includes(symbol)){
@@ -168,7 +168,7 @@ async function seedRoutesFromTeufelsturm() {
                 jump: route.difficulty.jump || null,
                 RP: route.difficulty.RP || null,
                 normal: route.difficulty.normal || null,
-                alternative: route.difficulty.alternative || null
+                withoutSupport: route.difficulty.withoutSupport || null
               },
               unsecure: route.unsecure,
               stars: route.stars,

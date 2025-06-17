@@ -14,7 +14,7 @@ const routeSchema = new Schema({
     jump: String,
     RP: String,
     normal: String,
-    alternative: String
+    withoutSupport: String
   },
   summit: {
     type: Schema.Types.ObjectId,
