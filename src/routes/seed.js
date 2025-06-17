@@ -1,9 +1,10 @@
 const express = require('express');
 const Example = require('../models/Example');
+const { authenticate, isAdmin } = require('../middleware/auth');
 const router = express.Router();
 
 // Seed database with dummy data if empty
-router.post('/', async (req, res) => {
+router.post('/', authenticate, isAdmin, async (req, res) => {
   try {
     const count = await Example.countDocuments();
     if (count === 0) {
