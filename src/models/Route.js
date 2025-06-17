@@ -2,7 +2,12 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const routeSchema = new Schema({
-  name: String,
+  name:{
+    type: String,
+    required: true
+  },
+  teufelsturmId: String,
+  teufelsturmScore: String,
   unsecure: Boolean,
   stars: Number,
   difficulty: {

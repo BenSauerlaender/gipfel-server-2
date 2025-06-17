@@ -5,7 +5,6 @@ const summitSchema = new Schema({
   name: {
     type: String,
     required: true,
-    unique: true
   },
   region: {
     type: Schema.Types.ObjectId,

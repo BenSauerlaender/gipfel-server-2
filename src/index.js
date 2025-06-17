@@ -4,7 +4,6 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 
 const apiRoutes = require('./routes/api');
-const seedRoutes = require('./routes/seed');
 const authRoutes = require('./routes/auth');
 
 const app = express();
@@ -13,9 +12,8 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-app.use('/api', apiRoutes);
-app.use('/api/seed', seedRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api', apiRoutes);
 
 const MONGO_HOST = process.env.MONGO_HOST;
 const MONGO_PORT = process.env.MONGO_PORT;
