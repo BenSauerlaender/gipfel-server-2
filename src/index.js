@@ -15,18 +15,12 @@ app.use(express.json());
 app.use('/api', apiRoutes);
 app.use('/api/seed', seedRoutes);
 
-const MONGO_USER = process.env.MONGO_INITDB_ROOT_USERNAME;
-const MONGO_PASS = process.env.MONGO_INITDB_ROOT_PASSWORD;
 const MONGO_HOST = process.env.MONGO_HOST;
 const MONGO_PORT = process.env.MONGO_PORT;
-const MONGO_DB = process.env.MONGO_INITDB_DATABASE;
 
-const mongoUri = `mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}?authSource=admin`;
+const mongoUri = `mongodb://${MONGO_HOST}:${MONGO_PORT}`;
 
-mongoose.connect(mongoUri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(mongoUri)
   .then(() => {
     console.log('Connected to MongoDB');
     app.listen(PORT, () => {
