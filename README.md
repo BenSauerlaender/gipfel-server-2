@@ -2,3 +2,6 @@
 
 start database:
     docker-compose -f docker-compose-mongodb.yml up -d
+
+start server:
+    npm run dev
