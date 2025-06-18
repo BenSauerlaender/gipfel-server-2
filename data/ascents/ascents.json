@@ -1,0 +1,19 @@
+{
+  "ascents": [
+    {
+      "summit": "Falkenstein",
+      "route": "Schusterweg",
+      "climbers": ["Kay Sauerländer","Ben Sauerländer"],
+      "leadClimber": 0,
+      "date": "2023-01-01",
+      "isAborted": {
+        "value": false,
+        "note": null
+      },
+      "isTopRope": false,
+      "isSolo": false,
+      "isWithoutSupport": false,
+      "notes": null
+    }
+  ]
+}

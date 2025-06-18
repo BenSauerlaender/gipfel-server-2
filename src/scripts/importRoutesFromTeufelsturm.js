@@ -123,7 +123,7 @@ const processHtmlFile = async (htmlContent) => {
     return data;
 }; 
 
-async function seedRoutesFromTeufelsturm() {
+async function importRoutesFromTeufelsturm() {
   try {
     await mongoose.connect(mongoUri);
     console.log('Connected to MongoDB');
@@ -146,7 +146,6 @@ async function seedRoutesFromTeufelsturm() {
             { name: route.region },
             { upsert: true, new: true }
           );
-          await region.save();
 
           // Insert or update summit
           const summit = await Summit.findOneAndUpdate(
@@ -154,10 +153,9 @@ async function seedRoutesFromTeufelsturm() {
             { name: route.summit, region: region},
             { upsert: true, new: true }
           );
-          await summit.save();
 
           // Insert or update route
-          const routeNew = await Route.findOneAndUpdate(
+          await Route.findOneAndUpdate(
             { name: route.route, summit: summit },
             {
               name: route.route,
@@ -175,7 +173,6 @@ async function seedRoutesFromTeufelsturm() {
             },
             { upsert: true, new: true }
           );
-          await routeNew.save();
         }
         
         console.log(`Finished processing ${file}`);
@@ -190,4 +187,4 @@ async function seedRoutesFromTeufelsturm() {
   }
 }
 
-seedRoutesFromTeufelsturm(); 
+importRoutesFromTeufelsturm(); 

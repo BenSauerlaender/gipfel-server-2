@@ -8,7 +8,8 @@ const summitSchema = new Schema({
   },
   region: {
     type: Schema.Types.ObjectId,
-    ref: 'Region'
+    ref: 'Region',
+    required: true
   },
 }, { timestamps: true });
 
