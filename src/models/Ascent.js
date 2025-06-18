@@ -23,32 +23,24 @@ const ascentSchema = new Schema({
     },
     note: {
       type: String,
-      default: ''
+      default: null
     },
   },
   isTopRope: {
-    value: {
-      type: Boolean,
-      default: false
-    },
-    note: {
-      type: String,
-      default: ''
-    },
+    type: Boolean,
+    default: false
   },
   isSolo: {
-    value: {
-      type: Boolean,
-      default: false
-    },
-    note: {
-      type: String,
-      default: ''
-    },
+    type: Boolean,
+    default: false
+  },
+  isWithoutSupport: {
+    type: Boolean,
+    default: false
   },
   notes: {
     type: String,
-    default: ''
+    default: null
   },
 }, { timestamps: true });
 
