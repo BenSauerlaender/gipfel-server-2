@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 const mongoose = require('mongoose');
 
@@ -9,8 +10,14 @@ const authRoutes = require('./routes/auth');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+// Restrict CORS to only allow requests from your frontend domain and localhost for dev
+app.use(cors({
+  origin: 'http://localhost:9000',
+  credentials: true // if you use cookies for auth
+}));
+
 app.use(express.json());
+app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
 app.use('/api', apiRoutes);
