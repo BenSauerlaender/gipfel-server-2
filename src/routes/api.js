@@ -2,6 +2,9 @@ const express = require('express');
 const { authenticate } = require('../middleware/auth');
 const Climber = require('../models/Climber');
 const Ascent = require('../models/Ascent');
+const Route = require('../models/Route');
+const Summit = require('../models/Summit');
+const Region = require('../models/Region');
 const router = express.Router();
 
 // Health check endpoint (public)
@@ -22,15 +25,21 @@ router.get('/climbers', async (req, res) => {
   }
 });
 
-// Get all ascents for a given climber (by climberId)
-router.get('/climbers/:climberId/ascents', async (req, res) => {
+// Get all routes
+router.get('/routes', async (req, res) => {
   try {
-    const { climberId } = req.params;
-    const ascents = await Ascent.find({ climbers: climberId })
-      .populate('route')
-      .populate('climbers')
-      .populate('leadClimber');
-    res.json(ascents);
+    const routes = await Route.find();
+    res.json(routes);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get all summits
+router.get('/summits', async (req, res) => {
+  try {
+    const summits = await Summit.find().populate('region');
+    res.json(summits);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -40,9 +49,6 @@ router.get('/climbers/:climberId/ascents', async (req, res) => {
 router.get('/ascents', async (req, res) => {
   try {
     const ascents = await Ascent.find()
-      .populate('route')
-      .populate('climbers')
-      .populate('leadClimber');
     res.json(ascents);
   } catch (err) {
     res.status(500).json({ error: err.message });
