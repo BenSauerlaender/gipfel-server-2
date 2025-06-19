@@ -33,7 +33,7 @@ function generateRefreshToken(user) {
   );
 }
 
-// LOGIN: Issues access and refresh tokens
+// LOGIN: Issues access token and sets refresh token as httpOnly cookie
 router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -43,11 +43,11 @@ router.post('/login', async (req, res) => {
     // Find user and check password
     const user = await User.findOne({ username });
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials.' });
+      return res.status(401).json({ error: 'User not found.' });
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ error: 'Invalid credentials.' });
+      return res.status(401).json({ error: 'Invalid password.' });
     }
     // Generate tokens
     const accessToken = generateAccessToken(user);
@@ -55,10 +55,16 @@ router.post('/login', async (req, res) => {
     // Store refresh token in DB
     user.refreshTokens.push(refreshToken);
     await user.save();
-    // Return tokens and user info
+    // Set refresh token as httpOnly cookie
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // send only over HTTPS in production
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+    // Return access token and user info
     res.json({
       accessToken,
-      refreshToken,
       user: { username: user.username, role: user.role, _id: user._id }
     });
   } catch (err) {
@@ -69,7 +75,8 @@ router.post('/login', async (req, res) => {
 // REFRESH TOKEN: Issues a new access token (and rotates the refresh token)
 router.post('/refresh-token', async (req, res) => {
   try {
-    const { refreshToken } = req.body;
+    // Read refresh token from httpOnly cookie
+    const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) return res.status(400).json({ error: 'Refresh token required.' });
     let payload;
     // Verify refresh token
@@ -88,18 +95,26 @@ router.post('/refresh-token', async (req, res) => {
     const newRefreshToken = generateRefreshToken(user);
     user.refreshTokens.push(newRefreshToken);
     await user.save();
+    // Set new refresh token as httpOnly cookie
+    res.cookie('refreshToken', newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
     // Issue new access token
     const accessToken = generateAccessToken(user);
-    res.json({ accessToken, refreshToken: newRefreshToken });
+    res.json({ accessToken, user: { username: user.username, role: user.role, _id: user._id } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// LOGOUT: Invalidate a refresh token (removes it from DB)
+// LOGOUT: Invalidate a refresh token (removes it from DB and clears cookie)
 router.post('/logout', async (req, res) => {
   try {
-    const { refreshToken } = req.body;
+    // Read refresh token from httpOnly cookie
+    const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) return res.status(400).json({ error: 'Refresh token required.' });
     let payload;
     // Verify refresh token
@@ -113,6 +128,12 @@ router.post('/logout', async (req, res) => {
     if (!user) return res.status(401).json({ error: 'Invalid refresh token.' });
     user.refreshTokens = user.refreshTokens.filter(t => t !== refreshToken);
     await user.save();
+    // Clear the refresh token cookie
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
     res.json({ message: 'Logged out successfully.' });
   } catch (err) {
     res.status(500).json({ error: err.message });
