@@ -6,6 +6,7 @@
       "climbers": ["Kay Sauerländer","Ben Sauerländer"],
       "leadClimber": 0,
       "date": "2023-01-01",
+      "number": 1,
       "isAborted": {
         "value": false,
         "note": null
@@ -14,6 +15,54 @@
       "isSolo": false,
       "isWithoutSupport": false,
       "notes": null
+    },
+    {
+      "summit": "Falkenstein",
+      "route": "AW",
+      "climbers": ["Kay Sauerländer","Ben Sauerländer"],
+      "leadClimber": 0,
+      "date": "2023-01-01",
+      "number": 2,
+      "isAborted": {
+        "value": false,
+        "note": null
+      },
+      "isTopRope": false,
+      "isSolo": false,
+      "isWithoutSupport": false,
+      "notes": null
+    },
+    {
+      "summit": "Flasche",
+      "route": "AW",
+      "climbers": ["Kay Sauerländer","Ben Sauerländer"],
+      "leadClimber": 1,
+      "date": "2023-01-02",
+      "number": 1
+    },
+    {
+      "summit": "Tante",
+      "route": "AW",
+      "climbers": ["Kay Sauerländer","Ben Sauerländer"],
+      "leadClimber": 0,
+      "date": "2023-01-04",
+      "number": 1
+    },
+    {
+      "summit": "Falkenstein",
+      "route": "Turnerweg",
+      "climbers": ["Kay Sauerländer","Ben Sauerländer"],
+      "leadClimber": 0,
+      "date": "2023-04-20",
+      "number": 1
+    },
+    {
+      "summit": "Falkenstein",
+      "route": "Schusterweg",
+      "climbers": ["Kay Sauerländer","Ben Sauerländer"],
+      "leadClimber": 0,
+      "date": "2023-04-20",
+      "number": 2
     }
   ]
 }
