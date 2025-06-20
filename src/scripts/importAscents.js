@@ -24,6 +24,8 @@ async function importAscents() {
     const jsonContent = fs.readFileSync(filePath, 'utf8');
     const data = JSON.parse(jsonContent);
 
+    await Ascent.deleteMany({});
+
     for (const ascentData of data.ascents) {
       // Find the summit
       const summit = await Summit.findOne({ name: ascentData.summit });
@@ -57,7 +59,7 @@ async function importAscents() {
 
       // Create the ascent
       const ascent = new Ascent({
-        date: new Date(ascentData.date),
+        date: (new Date(ascentData.date)).setMilliseconds(ascentData.number),
         route: route._id,
         climbers: climberIds,
         leadClimber: leadClimber,
