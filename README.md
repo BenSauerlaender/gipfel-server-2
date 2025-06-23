@@ -5,3 +5,12 @@ start database:
 
 start server:
     npm run dev
+
+
+## TODO:
+- change ascents Model and imports
+    - remove aborted note
+    - fix komma schreibweise
+- Timeline
+    - add Aborted, notes, solo, ... , new summit, new route
+- ascents eintragen (ab 2016)
