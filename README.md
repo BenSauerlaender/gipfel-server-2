@@ -13,4 +13,4 @@ start server:
     - fix komma schreibweise
 - Timeline
     - add Aborted, notes, solo, ... , new summit, new route
-- ascents eintragen (ab 2016)
+- ascents eintragen (ab 2017)
