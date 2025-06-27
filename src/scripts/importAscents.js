@@ -61,7 +61,7 @@ async function importAscents() {
           { upsert: true, new: true }
         );
         await climber.save();
-        climberIds.push({ climber: climber._id, isAborted: false });
+        climberIds.push({ climber: climber._id, isAborted: isAborted });
       }
 
       // Get lead climber

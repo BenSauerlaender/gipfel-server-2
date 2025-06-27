@@ -8,6 +8,6 @@ start server:
 
 
 ## TODO:
-- Timeline
-    - add Aborted, notes, solo, ... , new summit, new route
 - ascents eintragen (ab 2018)
+
+
