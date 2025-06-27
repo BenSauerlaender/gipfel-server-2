@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
 require('dotenv').config();
+const RED = (text) => `\x1b[31m${text}\x1b[0m`;
 
 const Ascent = require('../models/Ascent');
 const Route = require('../models/Route');
@@ -20,7 +21,7 @@ async function importAscents() {
     await mongoose.connect(mongoUri);
     console.log('Connected to MongoDB');
 
-    const filePath = path.join(dataDir, 'ascents.json');
+    const filePath = path.join(dataDir, 'ascents.real.json');
     const jsonContent = fs.readFileSync(filePath, 'utf8');
     const data = JSON.parse(jsonContent);
 
@@ -30,32 +31,41 @@ async function importAscents() {
       // Find the summit
       const summit = await Summit.findOne({ name: ascentData.summit });
       if (!summit) {
-        console.log(`Summit not found: ${ascentData.summit}`);
+        console.warn(RED(`Summit not found: ${ascentData.summit}`));
         continue;
       }
 
       // Find the route
       const route = await Route.findOne({ name: ascentData.route, summit: summit });
       if (!route) {
-        console.log(`Route not found: ${ascentData.route}`);
+        console.warn(RED(`Route not found: ${ascentData.route}`));
         continue;
       }
 
       // Find or create climbers
       const climberIds = [];
-      for (const climberName of ascentData.climbers) {
-        const [firstName, lastName] = climberName.split(' ');
+      for (let climberShort of ascentData.climbers) {
+        let isAborted = false;
+        if(climberShort.startsWith('(')) {
+          isAborted = true;
+          climberShort = climberShort.slice(1, -1);
+        }
+        if (!data.climbers[climberShort]) {
+          console.warn(RED(`Climber not found: ${climberShort}`));
+          continue;
+        }
+        const [firstName, lastName] = data.climbers[climberShort].split(' ');
         const climber = await Climber.findOneAndUpdate(
           { firstName, lastName },
           { firstName, lastName },
           { upsert: true, new: true }
         );
         await climber.save();
-        climberIds.push(climber._id);
+        climberIds.push({ climber: climber._id, isAborted: false });
       }
 
       // Get lead climber
-      const leadClimber = climberIds[ascentData.leadClimber];
+      const leadClimber = climberIds[ascentData.leadClimber]?.climber;
 
       // Create the ascent
       const ascent = new Ascent({

@@ -8,23 +8,23 @@ const ascentSchema = new Schema({
     ref: 'Route'
   },
   climbers: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Climber',
-    default: [],
+    climber: {
+      type: Schema.Types.ObjectId,
+      ref: 'Climber',
+    },
+    isAborted: {
+      type: Boolean,
+      default: false
+    }
   }],
   leadClimber: {
     type: Schema.Types.ObjectId,
-    ref: 'Climber'
+    ref: 'Climber',
+    default: null
   },
   isAborted: {
-    value: {
-      type: Boolean,
-      default: false
-    },
-    note: {
-      type: String,
-      default: null
-    },
+    type: Boolean,
+    default: false
   },
   isTopRope: {
     type: Boolean,

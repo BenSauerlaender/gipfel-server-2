@@ -20,7 +20,8 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "importRoutesFromTeufelsturm": "node src/scripts/importRoutesFromTeufelsturm.js",
-    "importAscents": "node src/scripts/importAscents.js"
+    "importAscents": "node src/scripts/importAscents.js",
+    "fixSummitNames": "node src/scripts/fixSummitNames.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
