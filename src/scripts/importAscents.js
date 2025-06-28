@@ -38,12 +38,12 @@ async function importAscents() {
       // Find the route
       const route = await Route.findOne({ name: ascentData.route, summit: summit });
       if (!route) {
-        console.warn(RED(`Route not found: ${ascentData.route}`));
+        console.warn(RED(`Route not found: ${ascentData.route} on ${ascentData.summit}`));
         continue;
       }
 
       // Find or create climbers
-      const climberIds = [];
+      const climberIds = new Map();
       for (let climberShort of ascentData.climbers) {
         let isAborted = false;
         if(climberShort.startsWith('(')) {
@@ -61,22 +61,22 @@ async function importAscents() {
           { upsert: true, new: true }
         );
         await climber.save();
-        climberIds.push({ climber: climber._id, isAborted: isAborted });
+        climberIds.set(climberShort, { climber: climber._id, isAborted: isAborted });
       }
 
       // Get lead climber
-      const leadClimber = climberIds[ascentData.leadClimber]?.climber;
+      const leadClimber = climberIds.get(ascentData.leadClimber)?.climber;
 
       // Create the ascent
       const ascent = new Ascent({
         date: (new Date(ascentData.date)).setMilliseconds(ascentData.number),
         route: route._id,
-        climbers: climberIds,
+        climbers: Array.from(climberIds.values()),
         leadClimber: leadClimber,
-        isAborted: ascentData.isAborted,
-        isTopRope: ascentData.isTopRope,
-        isSolo: ascentData.isSolo,
-        isWithoutSupport: ascentData.isWithoutSupport,
+        isAborted: ascentData.isAborted || false,
+        isTopRope: ascentData.isTopRope || false,
+        isSolo: ascentData.isSolo || false,
+        isWithoutSupport: ascentData.isWithoutSupport || false,
         notes: ascentData.notes
       });
 

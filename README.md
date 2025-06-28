@@ -8,6 +8,14 @@ start server:
 
 
 ## TODO:
-- ascents eintragen (ab 2018)
+
+
+## Ascent notes
+- Zwergfels => Zwerg 
+- Kuchenturm, Septemberweg existiert nicht
+- 10.05.24 Bierdeckel AW (E. var.) => Variante zur Westkante 
+- 19.05.23 Stillerturm, AW existiert nicht
+- inconsistency: Schildkroete, W-Kante (statt Westkante) in der DB
+- inconsistency: "Lokomotive-Dom" vs. "Lokomotive - Esse"
 
 
