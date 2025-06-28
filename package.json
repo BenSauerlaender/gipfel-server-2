@@ -21,6 +21,7 @@
     "dev": "nodemon src/index.js",
     "importRoutesFromTeufelsturm": "node src/scripts/importRoutesFromTeufelsturm.js",
     "importAscents": "node src/scripts/importAscents.js",
+    "exportAscents": "node src/scripts/exportAscents.js",
     "fixSummitNames": "node src/scripts/fixSummitNames.js"
   },
   "dependencies": {
