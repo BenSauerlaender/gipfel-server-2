@@ -38,8 +38,18 @@ router.get('/routes', async (req, res) => {
 // Get all summits
 router.get('/summits', async (req, res) => {
   try {
-    const summits = await Summit.find().populate('region');
+    const summits = await Summit.find();
     res.json(summits);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get all regions
+router.get('/regions', async (req, res) => {
+  try {
+    const regions = await Region.find();
+    res.json(regions);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
