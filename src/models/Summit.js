@@ -9,7 +9,8 @@ const summitSchema = new Schema({
   region: {
     type: Schema.Types.ObjectId,
     ref: 'Region',
-    required: true
+    required: true,
+    index: true,
   },
   gpsPosition: {
     lng: Number,

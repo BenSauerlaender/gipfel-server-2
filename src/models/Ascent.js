@@ -5,12 +5,14 @@ const ascentSchema = new Schema({
   date: Date,
   route: {
     type: Schema.Types.ObjectId,
-    ref: 'Route'
+    ref: 'Route',
+    index: true,
   },
   climbers: [{
     climber: {
       type: Schema.Types.ObjectId,
       ref: 'Climber',
+      index: true,
     },
     isAborted: {
       type: Boolean,
@@ -20,7 +22,8 @@ const ascentSchema = new Schema({
   leadClimber: {
     type: Schema.Types.ObjectId,
     ref: 'Climber',
-    default: null
+    default: null,
+    index: true,
   },
   isAborted: {
     type: Boolean,

@@ -35,7 +35,26 @@ const startServer = async () => {
     // Connect to MongoDB
     await mongoose.connect(`mongodb://${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}?directConnection=true&replicaSet=rs0`);
     console.log('Connected to MongoDB');
-    
+
+    mongoose.set('debug', true);
+
+    // Ensure indexes for all models
+    const Ascent = require('./models/Ascent');
+    const Climber = require('./models/Climber');
+    const Region = require('./models/Region');
+    const Route = require('./models/Route');
+    const Summit = require('./models/Summit');
+    const User = require('./models/User');
+    await Promise.all([
+      Ascent.createIndexes(),
+      Climber.createIndexes(),
+      Region.createIndexes(),
+      Route.createIndexes(),
+      Summit.createIndexes(),
+      User.createIndexes()
+    ]);
+    console.log('Indexes ensured for all models');
+
     // Set up change streams for automatic cache invalidation
     setupChangeStreams();
     

@@ -19,7 +19,8 @@ const routeSchema = new Schema({
   summit: {
     type: Schema.Types.ObjectId,
     ref: 'Summit',
-    required: true
+    required: true,
+    index: true
   },
 }, { timestamps: true });
 
