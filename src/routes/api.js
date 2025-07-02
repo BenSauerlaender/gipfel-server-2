@@ -11,6 +11,8 @@ const { summitPipeline } = require('../pipelines/summit');
 const { ascentPipeline } = require('../pipelines/ascent');
 const { climberPipeline } = require('../pipelines/climber');
 const { routePipeline } = require('../pipelines/route');
+const CacheService = require('../services/cacheService')
+const computeTrips = require('../utill/computeTrips')
 const router = express.Router();
 
 // Health check endpoint (public)
@@ -44,6 +46,19 @@ router.get('/regions', cache('/regions', async (req, res) => {
 // Get all ascents
 router.get('/ascents', cache('/ascents', async (req, res) => {
     return await Ascent.aggregate(ascentPipeline)
+}));
+
+// Get trip object
+router.get('/trips', cache('/trips', async (req, res) => {
+      const cacheKey = CacheService.generateCacheKey('/ascents');
+      
+      // Check cache
+      let ascents = CacheService.get(cacheKey);
+      if (!ascents) {
+        ascents = await Ascent.aggregate(ascentPipeline)
+      }
+      return computeTrips(ascents)
+
 }));
 
 module.exports = router; 
