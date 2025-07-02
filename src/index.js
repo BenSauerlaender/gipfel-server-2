@@ -3,12 +3,17 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 const mongoose = require('mongoose');
+const { setupChangeStreams } = require('./services/changeStreamService');
+
+const MONGO_HOST = process.env.MONGO_HOST;
+const MONGO_PORT = process.env.MONGO_PORT;
+const MONGO_DATABASE = process.env.DATABASE;
 
 const apiRoutes = require('./routes/api');
 const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin.js')
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // Restrict CORS to only allow requests from your frontend domain and localhost for dev
 app.use(cors({
@@ -21,24 +26,39 @@ app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
 app.use('/api', apiRoutes);
+app.use('/api', adminRoutes);
+
+// Server setup
+const startServer = async () => {
+  try {
+    // Connect to MongoDB
+    await mongoose.connect(`mongodb://${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}`);
+    console.log('Connected to MongoDB');
+    
+    // Set up change streams for automatic cache invalidation
+    setupChangeStreams();
+    
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Server startup error:', error);
+    process.exit(1);
+  }
+};
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+  console.log('Shutting down gracefully...');
+  cache.clear();
+  mongoose.connection.close();
+  process.exit(0);
+});
 
 // Only connect to MongoDB and start the server if this file is run directly
 if (require.main === module) {
-  const MONGO_HOST = process.env.MONGO_HOST;
-  const MONGO_PORT = process.env.MONGO_PORT;
-  const mongoUri = `mongodb://${MONGO_HOST}:${MONGO_PORT}`;
-
-  mongoose.connect(mongoUri)
-    .then(() => {
-      console.log('Connected to MongoDB');
-      app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
-      });
-    })
-    .catch((err) => {
-      console.error('Failed to connect to MongoDB:', err);
-      process.exit(1);
-    });
+  startServer();
 }
 
 module.exports = app; 

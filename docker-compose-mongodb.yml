@@ -12,6 +12,7 @@ services:
       - '27017:27017'
     volumes:
       - mongo_data:/data/db
+    command: ["--replSet", "rs0", "--noauth"]
 
 volumes:
   mongo_data: 
