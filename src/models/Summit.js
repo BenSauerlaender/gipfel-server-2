@@ -11,6 +11,11 @@ const summitSchema = new Schema({
     ref: 'Region',
     required: true
   },
+  gpsPosition: {
+    lng: Number,
+    lat: Number
+  },
+  teufelsturmId: String
 }, { timestamps: true });
 
 module.exports = mongoose.model('Summit', summitSchema); 
