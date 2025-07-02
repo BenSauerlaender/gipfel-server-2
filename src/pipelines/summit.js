@@ -12,12 +12,13 @@ const summitPipeline = [
       {
         $lookup: {
           from: 'regions', // Collection name (lowercase, pluralized)
-          localField: '_id',
-          foreignField: 'region',
+          localField: 'region',
+          foreignField: '_id',
           as: 'region',
           pipeline: regionPipeline
         }
       },
+      {$unwind: { path: '$region', preserveNullAndEmptyArrays: true } }, // <--- Add this
       {
         $addFields: {
           routeIDs: '$routes._id', // Extract only the _id field from students
@@ -26,12 +27,6 @@ const summitPipeline = [
       },
       {
         $project: {
-          name: 1,
-          region: 1,
-          gpsPosition: 1,
-          teufelsturmId: 1,
-          routeIDs: 1,
-          routeCount: 1,
           routes: 0 
         }
       },

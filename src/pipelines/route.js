@@ -4,23 +4,13 @@ const routePipeline = [
       {
         $lookup: {
           from: 'summits', // Collection name (lowercase, pluralized)
-          localField: '_id',
-          foreignField: 'summit',
+          localField: 'summit',
+          foreignField: '_id',
           as: 'summit',
           pipeline: summitPipeline
         }
       },
-      {
-        $project: {
-          name: 1,
-          teufelsturmId: 1,
-          teufelsturmScore: 1,
-          unsecure: 1,
-          stars: 1,
-          difficulty: 1,
-          summit: 1
-        }
-      },
+      {$unwind: { path: '$summit', preserveNullAndEmptyArrays: true } }, // <--- Add this
       {
         $sort: { name: 1 }
       }

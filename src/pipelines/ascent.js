@@ -5,21 +5,23 @@ const ascentPipeline = [
       {
         $lookup: {
           from: 'routes', // Collection name (lowercase, pluralized)
-          localField: '_id',
-          foreignField: 'route',
+          localField: 'route',
+          foreignField: '_id',
           as: 'route',
           pipeline: routePipeline
         }
       },
+      {$unwind: { path: '$route', preserveNullAndEmptyArrays: true } }, // <--- Add this
       {
         $lookup: {
           from: 'climbers', // Collection name (lowercase, pluralized)
-          localField: '_id',
-          foreignField: 'leadClimber',
+          localField: 'leadClimber',
+          foreignField: '_id',
           as: 'leadClimber',
           pipeline: climberPipeline
         }
       },
+      {$unwind: { path: '$leadClimber', preserveNullAndEmptyArrays: true } }, // <--- Add this
       {
         $lookup: {
           from: 'climbers', // Collection name (lowercase, pluralized)
@@ -31,8 +33,8 @@ const ascentPipeline = [
                   $in: ['$_id', { $map: { input: '$$climbersList', in: '$$this.climber' } }]
                 }
               }
-            }
-          ].push(...climberPipeline),
+            }, ...climberPipeline
+          ],
           as: 'populatedClimbers'
         }
       },
@@ -64,15 +66,6 @@ const ascentPipeline = [
       },
       {
         $project: {
-          date: 1,
-          route: 1,
-          climbers: 1,
-          leadClimber: 1,
-          isAborted: 1,
-          isTopRope: 1,
-          isSolo: 1,
-          isWithoutSupport: 1,
-          notes: 1, 
           populatedClimbers: 0,
         }
       },

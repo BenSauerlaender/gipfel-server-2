@@ -4,14 +4,15 @@ const cookieParser = require('cookie-parser');
 require('dotenv').config();
 const mongoose = require('mongoose');
 const { setupChangeStreams } = require('./services/changeStreamService');
+const cache = require('memory-cache');
 
 const MONGO_HOST = process.env.MONGO_HOST;
 const MONGO_PORT = process.env.MONGO_PORT;
-const MONGO_DATABASE = process.env.DATABASE;
+const MONGO_DATABASE = process.env.MONGO_DATABASE;
 
 const apiRoutes = require('./routes/api');
 const authRoutes = require('./routes/auth');
-const adminRoutes = require('./routes/admin.js')
+const adminRoutes = require('./routes/admin')
 
 const app = express();
 
@@ -32,7 +33,7 @@ app.use('/api', adminRoutes);
 const startServer = async () => {
   try {
     // Connect to MongoDB
-    await mongoose.connect(`mongodb://${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}`);
+    await mongoose.connect(`mongodb://${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}?directConnection=true&replicaSet=rs0`);
     console.log('Connected to MongoDB');
     
     // Set up change streams for automatic cache invalidation

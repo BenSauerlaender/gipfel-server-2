@@ -15,14 +15,15 @@ const cache = (endpoint, computationFunction) => {
       
       // Compute data
       console.log(`Computing data for: ${cacheKey}`);
-      const result = await computationFunction(req);
+      const result = await computationFunction(req,res);
       
       // Cache result
       CacheService.set(cacheKey, result);
       
       res.json(result);
     } catch (error) {
-      next(error);
+      console.log(error)
+      res.status(500).json();
     }
   };
 };

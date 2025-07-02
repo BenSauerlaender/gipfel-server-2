@@ -15,9 +15,6 @@ const regionPipeline = [
       },
       {
         $project: {
-          name: 1,
-          summitIDs: 1,
-          summitCount: 1,
           summits: 0 
         }
       },
