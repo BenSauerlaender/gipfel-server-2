@@ -36,7 +36,7 @@ const startServer = async () => {
     await mongoose.connect(`mongodb://${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}?directConnection=true&replicaSet=rs0`);
     console.log('Connected to MongoDB');
 
-    mongoose.set('debug', true);
+    //mongoose.set('debug', true);
 
     // Ensure indexes for all models
     const Ascent = require('./models/Ascent');
