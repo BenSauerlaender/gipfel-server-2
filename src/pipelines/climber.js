@@ -4,18 +4,17 @@ const climberPipeline = [
           from: 'ascents', // Collection name (lowercase, pluralized)
           localField: '_id',
           foreignField: 'climbers.climber',
-          as: 'ascents'
+          as: 'ascentsData'
         }
       },
       {
         $addFields: {
-          ascentIDs: '$ascents._id', // Extract only the _id field from students
-          ascentsCount: { $size: '$ascents' },
+          ascentsCount: { $size: '$ascentsData' },
         }
       },
       {
         $project: {
-          ascents: 0 
+          ascentsData: 0
         }
       },
       {

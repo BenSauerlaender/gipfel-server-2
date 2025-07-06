@@ -10,7 +10,7 @@ const {cache } = require('../middleware/cache');
 const { summitPipeline } = require('../pipelines/summit');
 const { ascentPipeline } = require('../pipelines/ascent');
 const { climberPipeline } = require('../pipelines/climber');
-const { routePipeline } = require('../pipelines/route');
+const { routePipeline, routesBySummitPipeline } = require('../pipelines/route');
 const CacheService = require('../services/cacheService')
 const computeTrips = require('../utill/computeTrips')
 const router = express.Router();
@@ -30,7 +30,7 @@ router.get('/climbers', cache('/climbers', async (req, res) => {
 
 // Get all routes
 router.get('/routes', cache('/routes', async (req, res) => {
-    return await Route.aggregate(routePipeline)
+    return await Route.aggregate(routesBySummitPipeline)
 }));
 
 // Get all summits

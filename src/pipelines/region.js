@@ -9,7 +9,6 @@ const regionPipeline = [
       },
       {
         $addFields: {
-          summitIDs: '$summits._id', // Extract only the _id field from students
           summitCount: { $size: '$summits' },
         }
       },

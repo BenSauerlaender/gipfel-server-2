@@ -1,19 +1,74 @@
-const { summitPipeline } = require("./summit")
-
 const routePipeline = [
       {
         $lookup: {
-          from: 'summits', // Collection name (lowercase, pluralized)
+          from: 'summits',
           localField: 'summit',
           foreignField: '_id',
-          as: 'summit',
-          pipeline: summitPipeline
+          as: 'summitData',
         }
       },
-      {$unwind: { path: '$summit', preserveNullAndEmptyArrays: true } }, // <--- Add this
+      {$unwind: { path: '$summitData', preserveNullAndEmptyArrays: true } }, 
+      {
+        $lookup: {
+          from: 'regions', 
+          localField: 'region',
+          foreignField: '_id',
+          as: 'regionData'
+        }
+      },
+      {$unwind: { path: '$regionData', preserveNullAndEmptyArrays: true } },
+      {
+        $addFields: {
+          summitID: '$summit',
+          summitName: '$summitData.name',
+          regionId: '$region',
+          regionName: '$regionData.name',
+        }
+      },
+      {
+        $project: {
+          summitData: 0,
+          summit: 0,
+          regionData: 0,
+          region: 0
+        }
+      },
       {
         $sort: { name: 1 }
       }
     ]
 
-module.exports = {routePipeline}
+const routesBySummitPipeline = [
+      ...routePipeline,
+      {
+        $group: {
+          _id: '$summitID',
+          routes: { $push: '$$ROOT' }
+        }
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $arrayToObject: [
+              [
+                {
+                  k: { $toString: '$_id' },
+                  v: '$routes'
+                }
+              ]
+            ]
+          }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          result: { $mergeObjects: '$$ROOT' }
+        }
+      },
+      {
+        $replaceRoot: { newRoot: '$result' }
+      }
+    ]
+
+module.exports = {routePipeline, routesBySummitPipeline}

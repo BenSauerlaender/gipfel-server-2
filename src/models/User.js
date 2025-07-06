@@ -5,6 +5,6 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, enum: ['admin', 'user'], default: 'user' },
   refreshTokens: [{ type: String }], // Store valid refresh tokens for this user
-}, { timestamps: true });
+});
 
 module.exports = mongoose.model('User', userSchema); 

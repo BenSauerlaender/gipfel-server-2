@@ -45,6 +45,6 @@ const ascentSchema = new Schema({
     type: String,
     default: null
   },
-}, { timestamps: true });
+});
 
 module.exports = mongoose.model('Ascent', ascentSchema); 

@@ -7,6 +7,6 @@ const regionSchema = new Schema({
     required: true,
     unique: true
   },
-}, { timestamps: true });
+});
 
 module.exports = mongoose.model('Region', regionSchema); 

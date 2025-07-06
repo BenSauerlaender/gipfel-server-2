@@ -17,6 +17,6 @@ const summitSchema = new Schema({
     lat: Number
   },
   teufelsturmId: String
-}, { timestamps: true });
+});
 
 module.exports = mongoose.model('Summit', summitSchema); 

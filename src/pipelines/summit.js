@@ -1,9 +1,7 @@
-const {regionPipeline} = require('./region')
-
 const summitPipeline = [
       {
         $lookup: {
-          from: 'routes', // Collection name (lowercase, pluralized)
+          from: 'routes', 
           localField: '_id',
           foreignField: 'summit',
           as: 'routes'
@@ -11,23 +9,25 @@ const summitPipeline = [
       },
       {
         $lookup: {
-          from: 'regions', // Collection name (lowercase, pluralized)
+          from: 'regions', 
           localField: 'region',
           foreignField: '_id',
-          as: 'region',
-          pipeline: regionPipeline
+          as: 'regionData'
         }
       },
-      {$unwind: { path: '$region', preserveNullAndEmptyArrays: true } }, // <--- Add this
+      {$unwind: { path: '$regionData', preserveNullAndEmptyArrays: true } },
       {
         $addFields: {
-          routeIDs: '$routes._id', // Extract only the _id field from students
+          regionId: '$region',
+          regionName: '$regionData.name',
           routeCount: { $size: '$routes' },
         }
       },
       {
         $project: {
-          routes: 0 
+          routes: 0, 
+          regionData: 0,
+          region: 0
         }
       },
       {

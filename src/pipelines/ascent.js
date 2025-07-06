@@ -1,30 +1,28 @@
-const { climberPipeline } = require("./climber")
 const { routePipeline } = require("./route")
 
 const ascentPipeline = [
       {
         $lookup: {
-          from: 'routes', // Collection name (lowercase, pluralized)
+          from: 'routes',
           localField: 'route',
           foreignField: '_id',
           as: 'route',
           pipeline: routePipeline
         }
       },
-      {$unwind: { path: '$route', preserveNullAndEmptyArrays: true } }, // <--- Add this
+      {$unwind: { path: '$route', preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
-          from: 'climbers', // Collection name (lowercase, pluralized)
+          from: 'climbers',
           localField: 'leadClimber',
           foreignField: '_id',
           as: 'leadClimber',
-          pipeline: climberPipeline
         }
       },
-      {$unwind: { path: '$leadClimber', preserveNullAndEmptyArrays: true } }, // <--- Add this
+      {$unwind: { path: '$leadClimber', preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
-          from: 'climbers', // Collection name (lowercase, pluralized)
+          from: 'climbers',
           let: { climbersList: '$climbers' },
           pipeline: [
             {
@@ -33,7 +31,7 @@ const ascentPipeline = [
                   $in: ['$_id', { $map: { input: '$$climbersList', in: '$$this.climber' } }]
                 }
               }
-            }, ...climberPipeline
+            }
           ],
           as: 'populatedClimbers'
         }
