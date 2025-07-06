@@ -5,6 +5,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const { setupChangeStreams } = require('./services/changeStreamService');
 const cache = require('memory-cache');
+const cleanupExpiredTokens = require('./utill/cleanupExpiredTokens');
 
 const MONGO_HOST = process.env.MONGO_HOST;
 const MONGO_PORT = process.env.MONGO_PORT;
@@ -58,6 +59,12 @@ const startServer = async () => {
     // Set up change streams for automatic cache invalidation
     setupChangeStreams();
     
+    // Run cleanup task every hour
+    setInterval(() => {
+      console.log('Running cleanup task for expired refresh tokens...');
+      cleanupExpiredTokens();
+    }, 24 * 60 * 60 * 1000); // 1 hour in milliseconds
+
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
@@ -81,4 +88,4 @@ if (require.main === module) {
   startServer();
 }
 
-module.exports = app; 
+module.exports = app;

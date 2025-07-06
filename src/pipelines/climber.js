@@ -18,7 +18,7 @@ const climberPipeline = [
         }
       },
       {
-        $sort: { ascentsCount: 1 }
+        $sort: { ascentsCount: -1 }
       }
     ]
 module.exports = {climberPipeline}

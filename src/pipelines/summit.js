@@ -18,7 +18,7 @@ const summitPipeline = [
       {$unwind: { path: '$regionData', preserveNullAndEmptyArrays: true } },
       {
         $addFields: {
-          regionId: '$region',
+          regionID: '$region',
           regionName: '$regionData.name',
           routeCount: { $size: '$routes' },
         }

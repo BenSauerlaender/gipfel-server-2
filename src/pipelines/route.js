@@ -11,7 +11,7 @@ const routePipeline = [
       {
         $lookup: {
           from: 'regions', 
-          localField: 'region',
+          localField: 'summitData.region',
           foreignField: '_id',
           as: 'regionData'
         }
@@ -21,7 +21,7 @@ const routePipeline = [
         $addFields: {
           summitID: '$summit',
           summitName: '$summitData.name',
-          regionId: '$region',
+          regionID: '$summitData.region',
           regionName: '$regionData.name',
         }
       },
