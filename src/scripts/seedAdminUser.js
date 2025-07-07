@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
 const User = require('../models/User');
+const LastChange = require('../models/LastChange');
 const generateMongoUri = require('../utill/mongoUri');
 
 const mongoUri = generateMongoUri();
@@ -29,6 +30,14 @@ async function seedAdminUser() {
     });
     await adminUser.save();
     console.log(`Admin user created: ${ADMIN_USERNAME}`);
+
+    // Update LastChange collection
+    await LastChange.findOneAndUpdate(
+      { collectionName: 'users' },
+      { lastModified: new Date() },
+      { upsert: true }
+    );
+
     process.exit(0);
   } catch (err) {
     console.error('Error seeding admin user:', err);
@@ -36,4 +45,4 @@ async function seedAdminUser() {
   }
 }
 
-seedAdminUser(); 
+seedAdminUser();

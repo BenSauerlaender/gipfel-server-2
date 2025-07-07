@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 const Summit = require('../models/Summit');
+const LastChange = require('../models/LastChange');
 const generateMongoUri = require('../utill/mongoUri');
 
 const mongoUri = generateMongoUri();
@@ -22,6 +23,16 @@ async function fixSummitNames() {
         console.warn(`Skipping summit with unexpected format: '${summit.name}'`);
       }
     }
+
+    // Update LastChange collection
+    const now = new Date();
+    await LastChange.findOneAndUpdate(
+      { collectionName: 'summits' },
+      { lastModified: now },
+      { upsert: true }
+    );
+    console.log(`Updated last modified date for summits: ${now}`);
+
     console.log('Finished fixing summit names.');
     process.exit(0);
   } catch (err) {
@@ -30,4 +41,4 @@ async function fixSummitNames() {
   }
 }
 
-fixSummitNames(); 
+fixSummitNames();

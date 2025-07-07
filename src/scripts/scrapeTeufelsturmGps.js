@@ -71,6 +71,7 @@ async function scrapeTeufelsturmGps() {
     }
     fs.writeFileSync(outputPath, JSON.stringify(results, null, 2));
     console.log(`Done. Scraped ${scrapedCount} summits, skipped ${skippedCount}. Output: ${outputPath}`);
+
     process.exit(0);
   } catch (err) {
     console.error(RED('Error scraping teufelsturm GPS:'), err);
@@ -78,4 +79,4 @@ async function scrapeTeufelsturmGps() {
   }
 }
 
-scrapeTeufelsturmGps(); 
+scrapeTeufelsturmGps();

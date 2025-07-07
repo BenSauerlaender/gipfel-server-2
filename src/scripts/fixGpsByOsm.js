@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 require('dotenv').config();
 const Summit = require('../models/Summit');
+const LastChange = require('../models/LastChange');
 const generateMongoUri = require('../utill/mongoUri');
 
 const mongoUri = generateMongoUri();
@@ -91,6 +92,12 @@ async function fixGpsByOsm() {
       }
     } else {
       console.log(`Done. Updated ${updatedCount}, skipped ${skippedCount}.`);
+      // Update LastChange collection
+      await LastChange.findOneAndUpdate(
+        { collectionName: 'summits' },
+        { lastModified: new Date() },
+        { upsert: true }
+      );
     }
     if (notFound.length) {
       notFound.forEach((name) => console.warn(YELLOW(`Summit not found in OSM: ${name}`)));
@@ -102,4 +109,4 @@ async function fixGpsByOsm() {
   }
 }
 
-fixGpsByOsm(); 
+fixGpsByOsm();

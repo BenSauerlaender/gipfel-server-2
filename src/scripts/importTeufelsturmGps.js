@@ -2,10 +2,9 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 require('dotenv').config();
 const Summit = require('../models/Summit');
+const LastChange = require('../models/LastChange');
 const generateMongoUri = require('../utill/mongoUri');
 
-const MONGO_HOST = process.env.MONGO_HOST;
-const MONGO_PORT = process.env.MONGO_PORT;
 const mongoUri = generateMongoUri();
 const inputPath = 'data/teufelsturm/teufelsturm-gps.json';
 
@@ -37,6 +36,14 @@ async function importTeufelsturmGps() {
         console.log(`Updated ${summit.name}: lng=${entry.lng}, lat=${entry.lat}`);
       }
     }
+
+    // Update LastChange collection
+    await LastChange.findOneAndUpdate(
+      { collectionName: 'summits' },
+      { lastModified: new Date() },
+      { upsert: true }
+    );
+
     console.log(`Done. Updated ${updatedCount} summits from teufelsturm-gps.json, skipped ${skippedCount}.`);
     process.exit(0);
   } catch (err) {
@@ -45,4 +52,4 @@ async function importTeufelsturmGps() {
   }
 }
 
-importTeufelsturmGps(); 
+importTeufelsturmGps();

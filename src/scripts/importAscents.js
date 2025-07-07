@@ -8,6 +8,7 @@ const Ascent = require('../models/Ascent');
 const Route = require('../models/Route');
 const Climber = require('../models/Climber');
 const Summit = require('../models/Summit');
+const LastChange = require('../models/LastChange');
 const generateMongoUri = require('../utill/mongoUri');
 
 const mongoUri = generateMongoUri();
@@ -82,6 +83,19 @@ async function importAscents() {
       console.log(`Imported ascent: ${ascentData.route} on ${ascentData.date}`);
     }
 
+    // Update LastChange collection
+    await LastChange.findOneAndUpdate(
+      { collectionName: 'ascents' },
+      { lastModified: new Date() },
+      { upsert: true }
+    );
+
+    await LastChange.findOneAndUpdate(
+      { collectionName: 'climbers' },
+      { lastModified: new Date() },
+      { upsert: true }
+    );
+
     console.log('Successfully imported all ascents');
     process.exit(0);
   } catch (err) {
@@ -90,4 +104,4 @@ async function importAscents() {
   }
 }
 
-importAscents(); 
+importAscents();

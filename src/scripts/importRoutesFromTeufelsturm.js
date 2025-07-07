@@ -7,6 +7,7 @@ require('dotenv').config();
 const Summit = require('../models/Summit');
 const Region = require('../models/Region');
 const Route = require('../models/Route');
+const LastChange = require('../models/LastChange');
 const generateMongoUri = require('../utill/mongoUri');
 
 const dataDir = path.join(__dirname, '../../data/teufelsturm');
@@ -173,6 +174,25 @@ async function importRoutesFromTeufelsturm() {
               stars: route.stars,
             },
             { upsert: true, new: true }
+          );
+        }
+
+        if (!dryRun) {
+          // Update LastChange collection
+          await LastChange.findOneAndUpdate(
+            { collectionName: 'routes' },
+            { lastModified: new Date() },
+            { upsert: true }
+          );
+          await LastChange.findOneAndUpdate(
+            { collectionName: 'summits' },
+            { lastModified: new Date() },
+            { upsert: true }
+          );
+          await LastChange.findOneAndUpdate(
+            { collectionName: 'regions' },
+            { lastModified: new Date() },
+            { upsert: true }
           );
         }
 

@@ -14,6 +14,7 @@ const { routePipeline, routesBySummitPipeline } = require('../pipelines/route');
 const CacheService = require('../services/cacheService')
 const computeTrips = require('../utill/computeTrips')
 const router = express.Router();
+const LastChange = require('../models/LastChange');
 
 // Health check endpoint (public)
 router.get('/health', (req, res) => {
@@ -25,27 +26,32 @@ router.use(authenticate);
 
 // Get all climbers
 router.get('/climbers', cache('/climbers', async (req, res) => {
-    return await Climber.aggregate(climberPipeline)
+    const data = await Climber.aggregate(climberPipeline)
+    return {data: data, date: new Date()};
 }));
 
 // Get all routes
 router.get('/routes', cache('/routes', async (req, res) => {
-    return await Route.aggregate(routesBySummitPipeline)
+    const data = await Route.aggregate(routesBySummitPipeline)
+    return {data: data, date: new Date()};
 }));
 
 // Get all summits
 router.get('/summits', cache('/summits', async (req, res) => {
-    return await Summit.aggregate(summitPipeline);
+    const data = await Summit.aggregate(summitPipeline);
+    return {data: data, date: new Date()};
 }));
 
 // Get all regions
 router.get('/regions', cache('/regions', async (req, res) => {
-    return await Region.aggregate(regionPipeline);
+    const data = await Region.aggregate(regionPipeline);
+    return {data: data, date: new Date()};
 }));
 
 // Get all ascents
 router.get('/ascents', cache('/ascents', async (req, res) => {
-    return await Ascent.aggregate(ascentPipeline)
+    const data = await Ascent.aggregate(ascentPipeline)
+    return {data: data, date: new Date()};
 }));
 
 // Get trip object
@@ -57,8 +63,45 @@ router.get('/trips', cache('/trips', async (req, res) => {
       if (!ascents) {
         ascents = await Ascent.aggregate(ascentPipeline)
       }
-      return computeTrips(ascents)
+      return {data: computeTrips(ascents), date: new Date()}; 
 
 }));
 
-module.exports = router; 
+const routeDependencies = {
+    ascents: ["climbers", "routes", "summits","regions"], 
+    climbers: ["ascents"], 
+    regions: ["summits"], 
+    routes: ["regions","summits"], 
+    summits: ["regions", "routes"], 
+    trips: ["ascents","climbers", "routes", "summits","regions"]
+};
+
+router.get('/last-modified/:route', async (req, res) => {
+  const { route } = req.params;
+
+  const dependencies = routeDependencies[route];
+  if (!dependencies) {
+    return res.status(400).json({ error: 'Invalid route name.' });
+  }
+  dependencies.push(route); // include the route itself
+
+  try {
+    const lastModifiedDays = []
+    for (const collection of dependencies) {
+      const record = await LastChange.findOne({ collectionName: collection });
+      if (record && record.lastModified) {
+        lastModifiedDays.push(record.lastModified);
+      }
+    }
+
+    if (lastModifiedDays.length === 0) {
+      return res.status(404).json({ error: 'No modification date found for this collection.' });
+    }
+    const lastModified = new Date(Math.max(...lastModifiedDays));
+    res.json(lastModified)
+  } catch (err) {
+    res.status(500).json({ error: 'Error retrieving last modification date.' });
+  }
+});
+
+module.exports = router;
