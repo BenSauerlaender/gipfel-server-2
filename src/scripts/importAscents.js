@@ -8,11 +8,9 @@ const Ascent = require('../models/Ascent');
 const Route = require('../models/Route');
 const Climber = require('../models/Climber');
 const Summit = require('../models/Summit');
+const generateMongoUri = require('../utill/mongoUri');
 
-const MONGO_HOST = process.env.MONGO_HOST;
-const MONGO_PORT = process.env.MONGO_PORT;
-
-const mongoUri = `mongodb://${MONGO_HOST}:${MONGO_PORT}`;
+const mongoUri = generateMongoUri();
 
 const dataDir = path.join(__dirname, '../../data/ascents');
 

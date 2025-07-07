@@ -2,10 +2,9 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
 const User = require('../models/User');
+const generateMongoUri = require('../utill/mongoUri');
 
-const MONGO_HOST = process.env.MONGO_HOST;
-const MONGO_PORT = process.env.MONGO_PORT;
-const mongoUri = `mongodb://${MONGO_HOST}:${MONGO_PORT}`;
+const mongoUri = generateMongoUri();
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin';

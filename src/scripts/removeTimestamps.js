@@ -1,11 +1,8 @@
 const mongoose = require('mongoose');
+const generateMongoUri = require('../utill/mongoUri');
 require('dotenv').config();
 
-const MONGO_HOST = process.env.MONGO_HOST;
-const MONGO_PORT = process.env.MONGO_PORT;
-const MONGO_DATABASE = process.env.MONGO_DATABASE;
-
-const mongoUri = `mongodb://${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}?directConnection=true&replicaSet=rs0`
+const mongoUri = generateMongoUri();
 
 async function removeTimestampFields() {
   try {

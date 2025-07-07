@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 const Summit = require('../models/Summit');
+const generateMongoUri = require('../utill/mongoUri');
 
-const MONGO_HOST = process.env.MONGO_HOST;
-const MONGO_PORT = process.env.MONGO_PORT;
-const mongoUri = `mongodb://${MONGO_HOST}:${MONGO_PORT}`;
+const mongoUri = generateMongoUri();
 
 async function fixSummitNames() {
   try {

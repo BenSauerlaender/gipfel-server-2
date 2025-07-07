@@ -4,15 +4,14 @@ const cheerio = require('cheerio');
 require('dotenv').config();
 const Summit = require('../models/Summit');
 const Route = require('../models/Route');
+const generateMongoUri = require('../utill/mongoUri');
 const argv = process.argv.slice(2);
 const singleSummitArg = argv[0]; // Can be name or _id
 
 const RED = (text) => `\x1b[31m${text}\x1b[0m`;
 const YELLOW = (text) => `\x1b[33m${text}\x1b[0m`;
 
-const MONGO_HOST = process.env.MONGO_HOST;
-const MONGO_PORT = process.env.MONGO_PORT;
-const mongoUri = `mongodb://${MONGO_HOST}:${MONGO_PORT}`;
+const mongoUri = generateMongoUri();
 
 async function getGipfelnrFromRouteWegnr(wegnr) {
   try {

@@ -2,10 +2,9 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 require('dotenv').config();
 const Summit = require('../models/Summit');
+const generateMongoUri = require('../utill/mongoUri');
 
-const MONGO_HOST = process.env.MONGO_HOST;
-const MONGO_PORT = process.env.MONGO_PORT;
-const mongoUri = `mongodb://${MONGO_HOST}:${MONGO_PORT}`;
+const mongoUri = generateMongoUri();
 const geojsonPath = 'data/osm/export.geojson';
 
 const RED = (text) => `\x1b[31m${text}\x1b[0m`;

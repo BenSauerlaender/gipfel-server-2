@@ -6,10 +6,7 @@ const mongoose = require('mongoose');
 const { setupChangeStreams } = require('./services/changeStreamService');
 const cache = require('memory-cache');
 const cleanupExpiredTokens = require('./utill/cleanupExpiredTokens');
-
-const MONGO_HOST = process.env.MONGO_HOST;
-const MONGO_PORT = process.env.MONGO_PORT;
-const MONGO_DATABASE = process.env.MONGO_DATABASE;
+const generateMongoUri = require('./utill/mongoUri');
 
 const apiRoutes = require('./routes/api');
 const authRoutes = require('./routes/auth');
@@ -34,7 +31,7 @@ app.use('/api', adminRoutes);
 const startServer = async () => {
   try {
     // Connect to MongoDB
-    await mongoose.connect(`mongodb://${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}?directConnection=true&replicaSet=rs0`);
+    await mongoose.connect(generateMongoUri());
     console.log('Connected to MongoDB');
 
     //mongoose.set('debug', true);
@@ -58,7 +55,7 @@ const startServer = async () => {
 
     // Set up change streams for automatic cache invalidation
     setupChangeStreams();
-    
+
     // Run cleanup task every hour
     setInterval(() => {
       console.log('Running cleanup task for expired refresh tokens...');

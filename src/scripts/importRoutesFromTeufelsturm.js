@@ -7,24 +7,20 @@ require('dotenv').config();
 const Summit = require('../models/Summit');
 const Region = require('../models/Region');
 const Route = require('../models/Route');
-
-const MONGO_HOST = process.env.MONGO_HOST;
-const MONGO_PORT = process.env.MONGO_PORT;
-
-const mongoUri = `mongodb://${MONGO_HOST}:${MONGO_PORT}`;
+const generateMongoUri = require('../utill/mongoUri');
 
 const dataDir = path.join(__dirname, '../../data/teufelsturm');
 
 const JUMP_SCALA = ["1","2","3","4","5"]
 const SCALA = ["I", "II", "III", "IV", "V", "VI", "VIIa", "VIIb", "VIIc", "VIIIa", "VIIIb", "VIIIc", "IXa", "IXb", "IXc", "Xa", "Xb", "Xc", "XIa", "XIb", "XIc", "XIIa", "XIIb", "XIIc"]
 const scoreMap = {
-  'arrow-downright': '-3',
+  'arrow-downright': '-1',
   'arrow-downright2': '-2', 
-  'arrow-downright3': '-1',
+  'arrow-downright3': '-3',
   'arrow-right': '0',
-  'arrow-upright': '3',
+  'arrow-upright': '1',
   'arrow-upright2': '2',
-  'arrow-upright3': '1'
+  'arrow-upright3': '3'
 };
 
 const resolveDifficulty = (s) => {
@@ -100,12 +96,7 @@ const processHtmlFile = async (htmlContent) => {
       if (teufelsturmScore) {
         teufelsturmScore = teufelsturmScore.split('/').pop().split('.')[0]; // Extract the score from the image name
         // Resolve the score into a number
-        for (const [key, value] of Object.entries(scoreMap)) {
-          if (teufelsturmScore.includes(key)) {
-            teufelsturmScore = value;
-            break;
-          }
-        }
+        teufelsturmScore = scoreMap[teufelsturmScore] || undefined
       }
 
       return {
@@ -123,13 +114,15 @@ const processHtmlFile = async (htmlContent) => {
     return data;
 }; 
 
+const dryRun = process.argv.includes('--dry-run');
+
 async function importRoutesFromTeufelsturm() {
   try {
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(generateMongoUri());
     console.log('Connected to MongoDB');
 
     const files = fs.readdirSync(dataDir);
-    
+
     for (const file of files) {
       if (file.endsWith('.html')) {
         console.log(`Processing ${file}...`);
@@ -137,7 +130,15 @@ async function importRoutesFromTeufelsturm() {
         const htmlContent = fs.readFileSync(filePath, 'utf8');
 
         const data = await processHtmlFile(htmlContent);
-        
+
+        if (dryRun) {
+          console.log(`Dry run, dont seed database`);
+          data.forEach(route => {
+           //console.log(route.teufelsturmScore);
+          });
+          continue;
+        }
+
         // Insert or update regions, summits, and routes
         for (const route of data) {
           // Insert or update region
@@ -149,8 +150,8 @@ async function importRoutesFromTeufelsturm() {
 
           // Insert or update summit
           const summit = await Summit.findOneAndUpdate(
-            { name: route.summit, region: region},
-            { name: route.summit, region: region},
+            { name: route.summit, region: region },
+            { name: route.summit, region: region },
             { upsert: true, new: true }
           );
 
@@ -174,7 +175,7 @@ async function importRoutesFromTeufelsturm() {
             { upsert: true, new: true }
           );
         }
-        
+
         console.log(`Finished processing ${file}`);
       }
     }
@@ -187,4 +188,4 @@ async function importRoutesFromTeufelsturm() {
   }
 }
 
-importRoutesFromTeufelsturm(); 
+importRoutesFromTeufelsturm();
