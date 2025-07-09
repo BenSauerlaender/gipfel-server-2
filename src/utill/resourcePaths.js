@@ -1,0 +1,1 @@
+module.exports.mapFontsPath = 'data/map/fonts.tar.gz'

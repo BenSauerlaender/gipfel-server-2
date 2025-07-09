@@ -8,6 +8,7 @@ const cache = require('memory-cache');
 const cleanupExpiredTokens = require('./utill/cleanupExpiredTokens');
 const generateMongoUri = require('./utill/mongoUri');
 
+const mapRoutes = require('./routes/mapResources');
 const apiRoutes = require('./routes/api');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin')
@@ -25,6 +26,7 @@ app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
 app.use('/api', apiRoutes);
+app.use('/api/map', mapRoutes);
 app.use('/api', adminRoutes);
 
 // Server setup

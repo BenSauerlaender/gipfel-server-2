@@ -15,6 +15,8 @@ const CacheService = require('../services/cacheService')
 const computeTrips = require('../utill/computeTrips')
 const router = express.Router();
 const LastChange = require('../models/LastChange');
+const fs = require('fs');
+const { mapFontsPath } = require('../utill/resourcePaths');
 
 // Health check endpoint (public)
 router.get('/health', (req, res) => {
@@ -76,6 +78,17 @@ const routeDependencies = {
     trips: ["ascents","climbers", "routes", "summits","regions"]
 };
 
+router.get('/last-modified/map/fonts', async (req, res) => {
+  try {
+    var stats = fs.statSync(mapFontsPath);
+    const lastModified = new Date(stats.mtime);
+    res.json(lastModified);
+  } catch (err) {
+    res.status(500).json({ error: 'Error retrieving last modification date.' });
+    console.error('Error retrieving last modification date:', err);
+  }
+});
+
 router.get('/last-modified/:route', async (req, res) => {
   const { route } = req.params;
 
@@ -103,5 +116,6 @@ router.get('/last-modified/:route', async (req, res) => {
     res.status(500).json({ error: 'Error retrieving last modification date.' });
   }
 });
+
 
 module.exports = router;
