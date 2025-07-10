@@ -1,5 +1,6 @@
 module.exports = computeTrips = (ascents) => {
     // Group ascents by day (YYYY-MM-DD)
+    if(ascents && ascents.length === 1) ascents = ascents[0]
     const ascentsByDay = ascents
         .map(ascent => { return { _id: ascent._id, date: ascent.date } })
         .toSorted((a, b) => new Date(a.date) - new Date(b.date))
