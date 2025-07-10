@@ -1,0 +1,95 @@
+#!/bin/bash
+
+set -e
+
+# Check if .env file exists
+if [ ! -f .env ]; then
+    echo "Error: .env file not found!"
+    echo "Please create a .env file with:"
+    echo "MAP_PBF_URL=https://your-pbf-url.com/data.osm.pbf"
+    echo "MAP_BBOX=13.088,52.338,13.761,52.675  # Optional: west,south,east,north"
+    exit 1
+fi
+
+# Load environment variables
+source .env
+
+# Check if MAP_PBF_URL is set
+if [ -z "$MAP_PBF_URL" ]; then
+    echo "Error: MAP_PBF_URL not set in .env file!"
+    exit 1
+fi
+
+CURR_DIR=$(pwd)
+OMT="$CURR_DIR/$OPENMAPTILES_PATH"
+
+PBF_FILE="$CURR_DIR/$(basename "$MAP_PBF_URL")"
+FILTERED_PBF="$CURR_DIR/filtered.osm.pbf"
+MBTILES_FILE="$CURR_DIR/tiles.mbtiles"
+
+STOP_SKIPPING="false"
+
+# Download PBF
+if [ ! -f "$PBF_FILE" ] || [ "$STOP_SKIPPING" = "true" ]; then
+    echo "Downloading $PBF_FILE..."
+    wget "$MAP_PBF_URL" -O "$PBF_FILE"
+    STOP_SKIPPING="true"
+else
+    echo "PBF file already exists, skipping download"
+fi
+
+# Filter PBF
+if [ ! -f "$FILTERED_PBF" ] || [ "$STOP_SKIPPING" = "true" ]; then
+    echo "Filtering $PBF_FILE..."
+    osmium extract "$PBF_FILE" -o "$FILTERED_PBF" -f pbf -b "$MAP_BBOX" --overwrite 
+    STOP_SKIPPING="true"
+else
+    echo "FILTERED_PBF file already exists, skipping filtering"
+fi
+
+# Generate mbtiles
+if [ ! -f "$MBTILES_FILE" ] || [ "$STOP_SKIPPING" = "true" ]; then
+    echo "Generating mbtiles..."
+    cp "$FILTERED_PBF" "$OMT"/data/input.osm.pbf
+    cd "$OMT"
+    make start-db
+    make generate-tiles-pg 
+    cp data/tiles.mbtiles "$MBTILES_FILE"
+    cd "$CURR_DIR"
+    STOP_SKIPPING="true"
+else
+    echo "MBTiles file already exists, skipping generation"
+fi
+
+# Extract tiles
+if [ ! -d "tiles" ] || [ "$STOP_SKIPPING" = "true" ]; then
+    echo "Extracting tiles..."
+    rm -rf tiles/
+    mb-util "$MBTILES_FILE" tiles --image_format=pbf
+    
+    echo "Uncompressing .pbf.gz files..."
+    find tiles/ -name "*.pbf" -type f -exec sh -c 'for f; do mv "$f" "$f.gz" && gunzip "$f.gz"; done' _ {} +
+    STOP_SKIPPING="true"
+else
+    echo "Tiles directory already exists, skipping extraction"
+fi
+
+# Create archive
+if [ ! -f "tiles.tar.gz" ] || [ "$STOP_SKIPPING" = "true" ]; then
+    echo "Creating archive..."
+    tar -czf tiles.tar.gz tiles/
+    STOP_SKIPPING="true"
+else
+    echo "Archive already exists, skipping creation"
+fi
+
+# Cleanup
+rm -f "$PBF_FILE" "$MBTILES_FILE" "$FILTERED_PBF"
+if [ "$FILTERED_PBF" != "$PBF_FILE" ]; then
+    rm -f "$FILTERED_PBF"
+fi
+rm -rf tiles/
+
+mv tiles.tar.gz "$MAP_OUTPUT_PATH"
+
+echo "Done: tiles.tar.gz"

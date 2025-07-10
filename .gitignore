@@ -136,3 +136,8 @@ dist
 .pnp.*
 
 data/
+
+*.osm.pbf
+*.osm-filtered.pbf
+*.osm.mbtiles
+tiles/
