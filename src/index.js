@@ -11,7 +11,9 @@ const generateMongoUri = require('./utill/mongoUri');
 const mapRoutes = require('./routes/mapResources');
 const apiRoutes = require('./routes/api');
 const authRoutes = require('./routes/auth');
-const adminRoutes = require('./routes/admin')
+const adminRoutes = require('./routes/admin');
+
+const { authenticate, isAdmin } = require('./middleware/auth');
 
 const app = express();
 
@@ -24,9 +26,21 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+
+
+// Health check endpoint (public)
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 app.use('/auth', authRoutes);
+
+app.use(authenticate)
+
 app.use('', apiRoutes);
 app.use('/map', mapRoutes);
+
+app.use(isAdmin)
 app.use('', adminRoutes);
 
 // Server setup

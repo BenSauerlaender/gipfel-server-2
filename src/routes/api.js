@@ -1,5 +1,4 @@
 const express = require('express');
-const { authenticate } = require('../middleware/auth');
 const Climber = require('../models/Climber');
 const Ascent = require('../models/Ascent');
 const Route = require('../models/Route');
@@ -18,13 +17,6 @@ const LastChange = require('../models/LastChange');
 const fs = require('fs');
 const resourcePaths = require('../utill/resourcePaths');
 
-// Health check endpoint (public)
-router.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
-});
-
-// All routes below require authentication
-router.use(authenticate);
 
 // Get all climbers
 router.get('/climbers', cache('/climbers', async (req, res) => {

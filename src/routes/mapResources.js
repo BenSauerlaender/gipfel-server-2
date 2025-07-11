@@ -1,12 +1,9 @@
 const express = require('express');
 const CacheService = require('../services/cacheService');
-const { authenticate, isAdmin } = require('../middleware/auth');
 const paths = require('../utill/resourcePaths');
 const fs = require('fs');
 
 const router = express.Router();
-
-router.use(authenticate);
 
 router.get('/fonts', (req, res) => {
   const compressedData = fs.readFileSync(paths.mapFontsPath);
