@@ -17,17 +17,17 @@ const app = express();
 
 // Restrict CORS to only allow requests from your frontend domain and localhost for dev
 app.use(cors({
-  origin: 'http://localhost:9000',
+  origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : 'http://localhost:9000',
   credentials: true // if you use cookies for auth
 }));
 
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/api/auth', authRoutes);
-app.use('/api', apiRoutes);
-app.use('/api/map', mapRoutes);
-app.use('/api', adminRoutes);
+app.use('/auth', authRoutes);
+app.use('', apiRoutes);
+app.use('/map', mapRoutes);
+app.use('', adminRoutes);
 
 // Server setup
 const startServer = async () => {
