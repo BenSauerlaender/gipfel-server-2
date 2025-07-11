@@ -27,16 +27,16 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Health check endpoint (public)
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-app.use('/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 
-app.use('/resources', authenticate, apiRoutes);
-app.use('/resources/map', authenticate, mapRoutes);
+app.use('/api/resources', authenticate, apiRoutes);
+app.use('/api/resources/map', authenticate, mapRoutes);
 
-app.use('/admin', authenticate, isAdmin, adminRoutes);
+app.use('/api/admin', authenticate, isAdmin, adminRoutes);
 
 // Server setup
 const startServer = async () => {
