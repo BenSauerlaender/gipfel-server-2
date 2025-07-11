@@ -16,8 +16,11 @@ const role = roleArg === 'admin' ? 'admin' : 'user';
 async function main() {
   await mongoose.connect(generateMongoUri());
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = new User({ username, password: hashedPassword, role });
-  await User.findOneAndReplace({ username }, user, { upsert: true, new: true });
+  await User.findOneAndUpdate(
+    { username },
+    { username, password: hashedPassword, role },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
   console.log(`User '${username}' created with role '${role}'.`);
   await mongoose.disconnect();
 }
