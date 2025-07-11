@@ -26,8 +26,6 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-
-
 // Health check endpoint (public)
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
@@ -35,13 +33,10 @@ app.get('/health', (req, res) => {
 
 app.use('/auth', authRoutes);
 
-app.use(authenticate)
+app.use('', authenticate, apiRoutes);
+app.use('/map', authenticate, mapRoutes);
 
-app.use('', apiRoutes);
-app.use('/map', mapRoutes);
-
-app.use(isAdmin)
-app.use('', adminRoutes);
+app.use('', authenticate, isAdmin, adminRoutes);
 
 // Server setup
 const startServer = async () => {
