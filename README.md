@@ -17,11 +17,13 @@ This section explains how to generate and organize the map resources for gipfel-
 - **Contents:** Archive of uncompressed `.pbf` vector tiles in the structure: `tiles/{z}/{x}/{y}.pbf`
 - **Tools Required:**  
   - [osmium](https://osmcode.org/osmium-tool/) - For filtering OpenStreetMap data
-  - [tilemaker (Docker)](https://github.com/systemed/tilemaker) - For generating vector tiles
+  - [openmaptiles](https://github.com/openmaptiles/openmaptiles) (needs to be cloned locally and prepared via `make`) - For generating vector tiles
   - [mb-util](https://github.com/mapbox/mbutil) - For extracting tiles
   - Standard Unix tools: `wget`, `gunzip`, `tar`
 
 - **Generation:**  
+  Specify settings in the `.env` file (see `map.example.env`)
+
   Run:
   ```bash
   ./create-tiles
@@ -75,6 +77,7 @@ These resources must be present for the map server to function correctly. After 
 
 - Do the map style downloads "automaticly"
 
+- save Server log
 
 ## Ascent notes
 - Zwergfels => Zwerg 
