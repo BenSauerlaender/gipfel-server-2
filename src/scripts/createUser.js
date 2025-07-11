@@ -15,7 +15,7 @@ const role = roleArg === 'admin' ? 'admin' : 'user';
 async function main() {
   await mongoose.connect(generateMongoUri());
   const user = new User({ username, password, role });
-  await user.save();
+  User.findOneAndReplace({ username }, user, { upsert: true, new: true });
   console.log(`User '${username}' created with role '${role}'.`);
   await mongoose.disconnect();
 }
