@@ -33,10 +33,10 @@ app.get('/health', (req, res) => {
 
 app.use('/auth', authRoutes);
 
-app.use('', authenticate, apiRoutes);
-app.use('/map', authenticate, mapRoutes);
+app.use('/resources', authenticate, apiRoutes);
+app.use('/resources/map', authenticate, mapRoutes);
 
-app.use('', authenticate, isAdmin, adminRoutes);
+app.use('/admin', authenticate, isAdmin, adminRoutes);
 
 // Server setup
 const startServer = async () => {
