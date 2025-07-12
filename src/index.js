@@ -26,12 +26,14 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+
 // Health check endpoint (public)
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
 app.use('/api/auth', authRoutes);
+app.get('/auth-nginx', authenticate, (req, res) => res.sendStatus(200));
 
 app.use('/api/resources', authenticate, apiRoutes);
 app.use('/api/resources/map', authenticate, mapRoutes);
