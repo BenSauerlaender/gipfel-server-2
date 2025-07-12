@@ -35,6 +35,9 @@ function generateRefreshToken(user) {
 
 // LOGIN: Issues access token and sets refresh token as httpOnly cookie
 router.post('/login', async (req, res) => {
+  if (process.env.DEBUG_DEACTIVATE_AUTH === 'true') {
+    return res.json({ accessToken: "dummyAccessToken", user: { username: "dummyUsername", role: "admin", _id: "dummyId" } });
+  }
   try {
     const { username, password } = req.body;
     if (!username || !password) {
@@ -74,6 +77,9 @@ router.post('/login', async (req, res) => {
 
 // REFRESH TOKEN: Issues a new access token (and rotates the refresh token)
 router.post('/refresh-token', async (req, res) => {
+  if (process.env.DEBUG_DEACTIVATE_AUTH === 'true') {
+    return res.json({ accessToken: "dummyAccessToken", user: { username: "dummyUsername", role: "admin", _id: "dummyId" } });
+  }
   try {
     // Read refresh token from httpOnly cookie
     const refreshToken = req.cookies.refreshToken;
