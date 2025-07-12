@@ -19,16 +19,23 @@ const app = express();
 
 // Restrict CORS to only allow requests from your frontend domain and localhost for dev
 
-app.use(cors(() => {
-  if (process.env.DEBUG_DEACTIVATE_AUTH === 'true') {
-    return { origin: '*' }; // Allow all origins if auth is deactivated
-  } else {
-    return {
-      origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : 'http://localhost:9000',
-      credentials: true // if you use cookies for auth
-    };
-  }
+const allowedOrigins = [];
+if (process.env.NODE_ENV === 'production') {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+if(process.env.NODE_ENV === 'development' || process.env.DEBUG_ALLOW_LOCALHOST === 'true') {
+  allowedOrigins.push("http://localhost:9000");
+}
+console.log('Allowed origins:', allowedOrigins);
+
+try {
+app.use(cors({
+  origin: (allowedOrigins.length === 1) ? allowedOrigins[0] : allowedOrigins,
+  credentials: true // if you use cookies for auth
 }));
+} catch (error) {
+  console.error('CORS setup error:', error);
+}
 
 app.use(express.json());
 app.use(cookieParser());
