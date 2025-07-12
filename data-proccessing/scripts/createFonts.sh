@@ -34,7 +34,7 @@ rm -rf "$TMP_DIR"/*
 echo "Copying fonts from $INPUT_DIR to $TMP_DIR..."
 
 # Read each line from the config file
-while IFS= read -r line; do
+while IFS= read -r line || [[ -n "$line" ]]; do
     # Skip empty lines and comments
     [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
     

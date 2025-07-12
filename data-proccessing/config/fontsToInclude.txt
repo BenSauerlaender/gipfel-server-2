@@ -3,6 +3,8 @@
 "Open Sans Semi Bold"/"0-255.pbf"
 "Open Sans Bold"/"0-255.pbf"
 "Noto Sans Regular"/"0-255.pbf"
+"Open Sans Regular"/"0-255.pbf"
+"Open Sans Regular"/"256-511.pbf"
 "Open Sans Regular"/"8192-8447.pbf"
 "Open Sans Semi Bold"/"256-511.pbf"
 "Open Sans Semi Bold"/"7680-7935.pbf"
