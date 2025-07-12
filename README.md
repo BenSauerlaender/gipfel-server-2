@@ -89,3 +89,6 @@ These resources must be present for the map server to function correctly. After 
 
 
 
+
+### sync data to prod
+rsync -avz --delete -e "ssh" data/map/ stratoAppuser:/var/www/gipfelapp/api/data/map/

@@ -3,7 +3,7 @@ module.exports = {
   mapFontsPath: 'data/map/fonts.tar.gz',
 
   // Path to the sprite PNG file for the map
-  mapSpritePngPath: 'data/map/sprite.png',
+  mapSpritePngPath: 'data/map/sprite.pngFIX',
 
   // Path to the sprite JSON file for the map
   mapSpriteJsonPath: 'data/map/sprite.json',
