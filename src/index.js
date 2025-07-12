@@ -36,7 +36,7 @@ app.use('/api/auth', authRoutes);
 app.get('/auth-nginx', authenticate, (req, res) => res.sendStatus(200));
 
 app.use('/api/resources', authenticate, apiRoutes);
-app.use('/api/resources/map', authenticate, mapRoutes);
+app.use('/api/resources/map', authenticate, mapRoutes); //only for development prod routes /api/resources/map/ to nginx
 
 app.use('/api/admin', authenticate, isAdmin, adminRoutes);
 

@@ -4,8 +4,9 @@ const paths = require('../utill/resourcePaths');
 const fs = require('fs');
 
 const router = express.Router();
+//only for development prod routes /api/resources/map/ to nginx
 
-router.get('/fonts', (req, res) => {
+router.get('/fonts.tar.gz', (req, res) => {
   // Check if file exists
   if (!fs.existsSync(paths.mapFontsPath)) {
     return res.status(404).send('File not found');
@@ -17,7 +18,7 @@ router.get('/fonts', (req, res) => {
   res.set('Content-Disposition', 'attachment; filename="fonts.tar.gz"');
   res.send(compressedData);
 });
-router.get('/sprite/png', (req, res) => {
+router.get('/sprite.pngFIX', (req, res) => {
   // Check if file exists
   if (!fs.existsSync(paths.mapSpritePngPath)) {
     return res.status(404).send('File not found');
@@ -32,7 +33,7 @@ router.get('/sprite/png', (req, res) => {
     res.status(500).send('Error reading file');
   });
 });
-router.get('/sprite/json', (req, res) => {
+router.get('/sprite.json', (req, res) => {
   // Check if file exists
   if (!fs.existsSync(paths.mapSpriteJsonPath)) {
     return res.status(404).send('File not found');
@@ -41,7 +42,7 @@ router.get('/sprite/json', (req, res) => {
   res.set('Content-Type', 'application/json');
   res.send(JSON.parse(spriteJson));
 });
-router.get('/style', (req, res) => {
+router.get('/style.json', (req, res) => {
   // Check if file exists
   if (!fs.existsSync(paths.mapStylePath)) {
     return res.status(404).send('File not found');
@@ -50,7 +51,7 @@ router.get('/style', (req, res) => {
   res.set('Content-Type', 'application/json');
   res.send(JSON.parse(styleJson));
 });
-router.get('/tiles', (req, res) => {
+router.get('/tiles.tar.gz', (req, res) => {
   // Check if file exists
   if (!fs.existsSync(paths.mapTilesPath)) {
     return res.status(404).send('File not found');

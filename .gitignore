@@ -141,3 +141,7 @@ data/
 *.osm-filtered.pbf
 *.osm.mbtiles
 tiles/
+
+data-proccessing/input
+data-proccessing/output
+data-proccessing/tmp
