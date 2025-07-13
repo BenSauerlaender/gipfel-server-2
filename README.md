@@ -69,15 +69,26 @@ This section explains how to generate and organize the map resources for gipfel-
 
 These resources must be present for the map server to function correctly. After generating, verify all files are in their correct locations before
 
-## TODO:
-- fix summit gps
-- check for summits gps out of bound
 
-- create cohesive data gen pipeline
+## Data Generation pipeline *!*
+### DB *!*
+  - inputs: teufelsturmScrape(url?), osmDaten, ascents.json, aditional-routes.json
+  - output: teufelsturmJson, gpsOSMJson ggsTeufelsturmJson, teufelstum
+  - +DB Update scripts (import Routes, import Ascents, patch Gps, patch Teufelsturm GipfelNr)
+### Fonts
+  - angleichen
+### Style, Sprite,
+  - input: config(styleURL, ACCESSTOKEN)
+  - output, style.json, sprite.png, sprite.json
 
-- Do the map style downloads "automaticly"
+## Deployment scripts *!*
+  - code, files, dbSync, db backup
 
-- save Server log
+## Documentation
+
+## Featues:
+  - bundle all mapResources as .tar.gz 
+
 
 ## Ascent notes
 - Zwergfels => Zwerg 
@@ -92,3 +103,8 @@ These resources must be present for the map server to function correctly. After 
 
 ### sync data to prod
 rsync -avz --delete -e "ssh" data/map/ stratoAppuser:/var/www/gipfelapp/api/data/map/
+
+### sync db to prod
+mongodump --host localhost --port 27017 --db test --out ./dump
+mongo <host>:<port>/test --eval "db.dropDatabase()"
+mongorestore --host <host> --port <port> --db test ./dump/test
