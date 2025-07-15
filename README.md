@@ -91,14 +91,15 @@ These resources must be present for the map server to function correctly. After 
 
 
 ## Ascent notes
-- Zwergfels => Zwerg 
+- Zwergfels => Zwerg  (maybe fix)
 - Kuchenturm, Septemberweg existiert nicht
-- 10.05.24 Bierdeckel AW (E. var.) => Variante zur Westkante 
-- 19.05.23 Stillerturm, AW existiert nicht
 - inconsistency: Schildkroete, W-Kante (statt Westkante) in der DB
 - inconsistency: "Lokomotive-Dom" vs. "Lokomotive - Esse"
 
 
+## get points.geojson
+ogr2ogr -f "GeoJSON" points.geojson filtered.osm.pbf -sql "SELECT * FROM points"
+- TODO: use original osm.pbf set bounding box with -clipsrc bounds.json (https://gdal.org/en/stable/programs/ogr2ogr.html#ogr2ogr)
 
 
 ### sync data to prod
@@ -108,3 +109,4 @@ rsync -avz --delete -e "ssh" data/map/ stratoAppuser:/var/www/gipfelapp/api/data
 mongodump --host localhost --port 27017 --db test --out ./dump
 mongo <host>:<port>/test --eval "db.dropDatabase()"
 mongorestore --host <host> --port <port> --db test ./dump/test
+

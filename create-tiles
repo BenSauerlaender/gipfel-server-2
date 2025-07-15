@@ -46,7 +46,6 @@ if [ ! -f "$FILTERED_PBF" ] || [ "$STOP_SKIPPING" = "true" ]; then
 else
     echo "FILTERED_PBF file already exists, skipping filtering"
 fi
-
 # Generate mbtiles
 if [ ! -f "$MBTILES_FILE" ] || [ "$STOP_SKIPPING" = "true" ]; then
     echo "Generating mbtiles..."

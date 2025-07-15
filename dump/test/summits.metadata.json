@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"region":{"$numberInt":"1"}},"name":"region_1","background":true}],"uuid":"80780ee859574b248306d70b095fec7a","collectionName":"summits","type":"collection"}

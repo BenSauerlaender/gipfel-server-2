@@ -1,0 +1,53 @@
+{
+    "convertTTRoutes": {
+        "inputFiles": ["input/teufelsturm/wege1.html", "input/teufelsturm/wege2.html"],
+        "outputFiles": {
+          "regions": "output/regions.routes.tt.json",
+          "summits": "output/summits.routes.tt.json",
+          "routes": "output/routes.routes.tt.json"
+        }
+    },
+    "downloadTTSummits":{
+        "url": "https://www.teufelsturm.de/gipfel/suche.php",
+        "data": {
+            "text": "",
+            "gebietnr": "0",
+            "sortiert": "2",
+            "anzahl": "Alle"
+        },
+        "outputFile": "output/tt.summits.html"
+    },
+    "downloadTTRoutes": "TODO",
+    "convertTTSummits": {
+        "inputFiles": ["output/tt.summits.html"],
+        "outputFile": {
+            "summits": "output/summits.summits.tt.json",
+            "regions": "output/regions.summits.tt.json"
+        }
+    },
+    "downloadTTSummitLocations": {
+        "url": "https://www.teufelsturm.de/gipfel/details.php?gipfelnr=<gipfelNr>",
+        "inputFile":"output/summits.summits.tt.json",
+        "outputFile": "output/locations.summits.tt.json"
+    },
+    "convertOSMLocations": {
+        "inputFile": "input/points.geojson",
+        "summitFiles": ["output/summits.summits.tt.json", "output/summits.routes.tt.json"],
+        "outputFile": "output/locations.osm.json"
+    },
+    "importDataToDB": {
+        "climbers": ["input/climbers.json"],
+        "regions": ["output/regions.summits.tt.json", "output/regions.routes.tt.json" ],
+        "summits": ["output/summits.summits.tt.json", "output/summits.routes.tt.json"],
+        "locations": ["output/locations.summits.tt.json", "output/locations.osm.json"],
+        "routes": ["output/routes.routes.tt.json", "input/routes.json"],
+        "ascents": ["input/ascents.json"],
+        "config":{
+            "location": {
+                "logDistanceThreshold": 100,
+                "changeDistanceThreshold": 1000
+            }
+        }
+    }
+
+}
