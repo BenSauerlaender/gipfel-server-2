@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Teufelsturm Gipfelliste</title>
+  </head>
+  <body>
+    <h1>Gipfelliste</h1>
+    <table border="1">
+      <tr>
+        <th>Nr.</th>
+        <th>Gipfelname</th>
+        <th>Höhe</th>
+        <th>Region</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td><a href="gipfel.php?gipfelnr=1234">Zugspitze</a></td>
+        <td>2962m</td>
+        <td>Wetterstein</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td><a href="gipfel.php?gipfelnr=5678">Watzmann, Hoher</a></td>
+        <td>2713m</td>
+        <td>Berchtesgadener Alpen</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td><a href="gipfel.php?gipfelnr=9012">Großglockner</a></td>
+        <td>3798m</td>
+        <td>Hohe Tauern</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td><a href="gipfel.php?gipfelnr=3456">Ortler, Hoher</a></td>
+        <td>3905m</td>
+        <td>Ortler-Alpen</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td><a href="gipfel.php?gipfelnr=7890">Dachstein</a></td>
+        <td>2995m</td>
+        <td>Dachstein</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td><a href="gipfel.php?gipfelnr=2468">Piz Badile</a></td>
+        <td>3308m</td>
+        <td>Bergell</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td><a href="gipfel.php?gipfelnr=1357">Matterhorn</a></td>
+        <td>4478m</td>
+        <td>Walliser Alpen</td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td><a href="gipfel.php?gipfelnr=8642">Eiger</a></td>
+        <td>3967m</td>
+        <td>Berner Alpen</td>
+      </tr>
+      <!-- Row with insufficient columns (should be skipped) -->
+      <tr>
+        <td>9</td>
+        <td>Incomplete Row</td>
+      </tr>
+      <!-- Row without summit link (should be skipped) -->
+      <tr>
+        <td>10</td>
+        <td>No Link Summit</td>
+        <td>1000m</td>
+        <td>Test Region</td>
+      </tr>
+      <!-- Row with summit link but no gipfelnr parameter -->
+      <tr>
+        <td>11</td>
+        <td><a href="other.php">Summit Without ID</a></td>
+        <td>1500m</td>
+        <td>Test Region</td>
+      </tr>
+      <tr>
+        <td>12</td>
+        <td><a href="gipfel.php?gipfelnr=9999">Spitze, Große</a></td>
+        <td>2800m</td>
+        <td>Testregion</td>
+      </tr>
+    </table>
+  </body>
+</html>

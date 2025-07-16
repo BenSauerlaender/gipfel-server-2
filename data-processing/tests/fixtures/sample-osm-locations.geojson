@@ -1,0 +1,118 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kletterfelsen Testgebiet",
+        "climbing": "yes",
+        "sport": "rock_climbing",
+        "description": "Popular climbing area with multiple routes"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [13.405, 52.52]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Alpine Peak Test",
+        "natural": "peak",
+        "ele": "2500",
+        "climbing": "alpine"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [11.2583, 47.4239]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bouldering Area",
+        "sport": "bouldering",
+        "surface": "rock"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [8.5417, 47.3769]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Regular Park",
+        "leisure": "park",
+        "access": "public"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [13.3777, 52.5162]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Climbing Gym Indoor",
+        "leisure": "sports_centre",
+        "sport": "climbing",
+        "climbing": "sport"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [13.4194, 52.5069]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Traditional Climbing Crag",
+        "climbing": "traditional",
+        "rock": "limestone"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [12.3731, 47.8021]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Summit Without Climbing",
+        "natural": "peak",
+        "ele": "1800"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [10.7461, 46.948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Polygon Climbing Area",
+        "climbing": "yes",
+        "area": "yes"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [13.4, 52.515],
+            [13.41, 52.515],
+            [13.41, 52.525],
+            [13.4, 52.525],
+            [13.4, 52.515]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Feature Without Coordinates"
+      }
+    }
+  ]
+}

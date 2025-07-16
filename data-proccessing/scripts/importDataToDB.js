@@ -220,26 +220,22 @@ async function main() {
     const validRoutes = [];
     let skippedCount = 0;
     for (const route of routes) {
+        route.uniqueKey = `${route.name}_${route.summit}`;
       if (typeof route.summit === 'string') {
         const summitId = summitMap.get(route.summit);
         if (summitId) {
           route.summit = summitId;
-          validRoutes.push(route);
         } else {
           console.warn(`Route '${route.name}' skipped: summit '${route.summit}' not found.`);
           skippedCount++;
+          continue;
         }
-      } else if (route.summit) {
-        validRoutes.push(route);
-      } else {
-        console.warn(`Route '${route.name}' skipped: missing summit.`);
-        skippedCount++;
       }
     }
     if (skippedCount > 0) {
-      console.log(`Skipped ${skippedCount} routes due to missing or unmatched summit.`);
+      console.log(`Skipped ${skippedCount} routes due to missing or unmatched summit/name.`);
     }
-    await importCollection(Route, validRoutes, ['name', 'summit'], null, 'routes');
+    await importCollection(Route, validRoutes, 'uniqueKey', null, 'routes');
   }
   if (toImport.includes('ascents')) {
     const ascentsRaw = loadJsonFiles(config.importDataToDB.ascents.map(f => path.join(__dirname, '../', f)));
