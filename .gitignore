@@ -145,3 +145,5 @@ tiles/
 data-proccessing/input
 data-proccessing/output
 data-proccessing/tmp
+
+data-processing/cache

@@ -1,11 +1,10 @@
 # gipfel-server-2
 
 start database:
-    docker-compose -f docker-compose-mongodb.yml up -d
+docker-compose -f docker-compose-mongodb.yml up -d
 
 start server:
-    npm run dev
-
+npm run dev
 
 # Create Map Resources
 
@@ -15,7 +14,7 @@ This section explains how to generate and organize the map resources for gipfel-
 
 - **Location:** `data/tiles.tar.gz`
 - **Contents:** Archive of uncompressed `.pbf` vector tiles in the structure: `tiles/{z}/{x}/{y}.pbf`
-- **Tools Required:**  
+- **Tools Required:**
   - [osmium](https://osmcode.org/osmium-tool/) - For filtering OpenStreetMap data
   - [openmaptiles](https://github.com/openmaptiles/openmaptiles) (needs to be cloned locally and prepared via `make`) - For generating vector tiles
   - [mb-util](https://github.com/mapbox/mbutil) - For extracting tiles
@@ -25,9 +24,11 @@ This section explains how to generate and organize the map resources for gipfel-
   Specify settings in the `.env` file (see `map.example.env`)
 
   Run:
+
   ```bash
   ./create-tiles
   ```
+
   This script:
   1. Downloads OpenStreetMap data
   2. Filters to your region
@@ -69,44 +70,87 @@ This section explains how to generate and organize the map resources for gipfel-
 
 These resources must be present for the map server to function correctly. After generating, verify all files are in their correct locations before
 
+# TODO
 
-## Data Generation pipeline *!*
-### DB *!*
-  - inputs: teufelsturmScrape(url?), osmDaten, ascents.json, aditional-routes.json
-  - output: teufelsturmJson, gpsOSMJson ggsTeufelsturmJson, teufelstum
-  - +DB Update scripts (import Routes, import Ascents, patch Gps, patch Teufelsturm GipfelNr)
+- fix Ivi name
+- fix dataImport
+- fix mongo connector
+- add dbSync
+- add db backup
+
+## Data Generation pipeline _!_
+
+### DB _!_
+
+- inputs: teufelsturmScrape(url?), osmDaten, ascents.json, aditional-routes.json
+- output: teufelsturmJson, gpsOSMJson ggsTeufelsturmJson, teufelstum
+- +DB Update scripts (import Routes, import Ascents, patch Gps, patch Teufelsturm GipfelNr)
+
 ### Fonts
-  - angleichen
-### Style, Sprite,
-  - input: config(styleURL, ACCESSTOKEN)
-  - output, style.json, sprite.png, sprite.json
 
-## Deployment scripts *!*
-  - code, files, dbSync, db backup
+- angleichen
+
+### Style, Sprite,
+
+- input: config(styleURL, ACCESSTOKEN)
+- output, style.json, sprite.png, sprite.json
+
+## Deployment scripts _!_
+
+- code, files, dbSync, db backup
 
 ## Documentation
 
 ## Featues:
-  - bundle all mapResources as .tar.gz 
 
+- bundle all mapResources as .tar.gz
+
+## Route parsing errors:
+
+1. Zugang at Ziegenrückenturm (Rathener Gebiet)
+   Error: Route must have at least one difficulty set
+   TeufelsturmId: 6366
+   Difficulty data: {}
+
+2. Stripteasehöhle at Großer Eislochturm (Bielatal)
+   Error: Route must have at least one difficulty set
+   TeufelsturmId: 4149
+   Difficulty data: {}
+
+3. Zustieg at Griesgrundwächter (Wehlener Gebiet)
+   Error: Route must have at least one difficulty set
+   TeufelsturmId: 7298
+   Difficulty data: {}
+
+4. Mittelweg at Wartturm (Rathener Gebiet)
+   Error: Route must have at least one difficulty set
+   TeufelsturmId: 991
+   Difficulty data: {}
+
+5. Schwedenhöhle at Rabenturm (Bielatal)
+   Error: Route must have at least one difficulty set
+   TeufelsturmId: 4150
+   Difficulty data: {}
 
 ## Ascent notes
-- Zwergfels => Zwerg  (maybe fix)
+
+- Zwergfels => Zwerg (maybe fix)
 - Kuchenturm, Septemberweg existiert nicht
 - inconsistency: Schildkroete, W-Kante (statt Westkante) in der DB
 - inconsistency: "Lokomotive-Dom" vs. "Lokomotive - Esse"
 
-
 ## get points.geojson
-ogr2ogr -f "GeoJSON" points.geojson filtered.osm.pbf -sql "SELECT * FROM points"
+
+ogr2ogr -f "GeoJSON" points.geojson filtered.osm.pbf -sql "SELECT \* FROM points"
+
 - TODO: use original osm.pbf set bounding box with -clipsrc bounds.json (https://gdal.org/en/stable/programs/ogr2ogr.html#ogr2ogr)
 
-
 ### sync data to prod
+
 rsync -avz --delete -e "ssh" data/map/ stratoAppuser:/var/www/gipfelapp/api/data/map/
 
 ### sync db to prod
+
 mongodump --host localhost --port 27017 --db test --out ./dump
 mongo <host>:<port>/test --eval "db.dropDatabase()"
 mongorestore --host <host> --port <port> --db test ./dump/test
-
