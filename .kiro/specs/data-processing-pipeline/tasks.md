@@ -56,39 +56,24 @@
   - Write unit tests with sample GeoJSON data and cache scenarios
   - _Requirements: 4.1, 4.2, 4.4, 5.1, 5.2, 7.1_
 
-- [ ] 6.1 Implement JSON routes data source handler
+- [x] 6.1 Implement JSON routes data source handler
   - Create RoutesSource class for processing JSON route files
   - Implement JSON file reading and parsing for route data
   - Add route validation and data structure consistency
-  - Support single JSON file with route array
+  - Support multiple JSON files with route array
   - Integrate caching with JSON file dependency tracking
   - Write unit tests with sample JSON route data
   - _Requirements: 4.1, 4.2, 4.4, 5.1, 5.2, 7.1_
 
-- [ ] 6.2 Create RoutesSource example and documentation
-  - Create example script demonstrating RoutesSource usage
-  - Add support for processing routes.json file
-  - Document JSON route file format and expected structure
-  - Test with provided routes.json sample data
-  - Add error handling examples for malformed JSON
-  - _Requirements: 6.1, 6.2, 7.1_
-
-- [ ] 6.3 Implement JSON ascents data source handler
+- [x] 6.3 Implement JSON ascents data source handler
   - Create AscentsSource class for processing JSON ascent files
   - Implement JSON file reading and parsing for ascent data
   - Add ascent validation and data structure consistency
-  - Support single JSON file with ascent array
+  - Support multiple JSON files with ascent array and climbersAbbrMap
   - Integrate caching with JSON file dependency tracking
   - Write unit tests with sample JSON ascent data
-  - _Requirements: 4.1, 4.2, 4.4, 5.1, 5.2, 7.1_
-
-- [ ] 6.4 Create AscentsSource example and documentation
   - Create example script demonstrating AscentsSource usage
-  - Add support for processing ascents.json file
-  - Document JSON ascent file format and expected structure
-  - Test with provided ascents.json sample data
-  - Add error handling examples for malformed JSON
-  - _Requirements: 6.1, 6.2, 7.1_
+  - _Requirements: 4.1, 4.2, 4.4, 5.1, 5.2, 7.1_
 
 - [ ] 8. Implement database importer
   - Port existing importDataToDB.js logic to new DatabaseImporter class

@@ -1,8 +1,10 @@
 const path = require("path");
 const fs = require("fs").promises;
 const os = require("os");
+
 const TeufelsturmRoutesSource = require("../../lib/sources/teufelsturm-routes-source");
 const SimpleCache = require("../../lib/core/simple-cache");
+const ProcessingError = require("../../lib/core/error");
 
 describe("TeufelsturmRoutesSource", () => {
   let source;
@@ -70,11 +72,11 @@ describe("TeufelsturmRoutesSource", () => {
       expect(result).toHaveLength(1);
       expect(result[0]).toHaveProperty("filePath", sampleHtmlPath);
       expect(result[0]).toHaveProperty("content");
-      expect(result[0].content).toContain("Testgipfel");
+      expect(result[0].content).toContain("Test Summit 1");
     });
 
     test("should handle missing files gracefully", async () => {
-      source.config.inputFiles = ["/nonexistent/file.html"];
+      source.inputFiles = ["/nonexistent/file.html"];
 
       await expect(source.fetch()).rejects.toThrow(
         "No HTML files could be loaded"
@@ -101,26 +103,50 @@ describe("TeufelsturmRoutesSource", () => {
       expect(result).toHaveProperty("metadata");
 
       // Check regions
-      expect(result.regions).toContainEqual({ name: "Testgebiet" });
-      expect(result.regions).toContainEqual({ name: "Grosser Zschand" });
-      expect(result.regions).toContainEqual({ name: "Rathener Gebiet" });
+      expect(result.regions).toContainEqual({ name: "Test Region 1" });
+      expect(result.regions).toContainEqual({ name: "Test Region 2" });
 
       // Check summits
-      const testSummit = result.summits.find((s) => s.name === "Testgipfel");
+      const testSummit = result.summits.find((s) => s.name === "Test Summit 1");
       expect(testSummit).toBeDefined();
-      expect(testSummit.region).toBe("Testgebiet");
+      expect(testSummit.region).toBe("Test Region 1");
 
       // Check routes
-      const testRoute = result.routes.find((r) => r.name === "Testroute");
+      const testRoute = result.routes.find((r) => r.name === "Test Route 1");
       expect(testRoute).toBeDefined();
-      expect(testRoute.summit).toBe("Testgipfel");
-      expect(testRoute.teufelsturmId).toBe("12345");
+      expect(testRoute.summit).toBe("Test Summit 1");
+      expect(testRoute.teufelsturmId).toBe("1001");
       expect(testRoute.teufelsturmScore).toBe("1");
     });
 
     test("should handle comma-separated summit names", async () => {
-      const htmlFiles = await source.fetch();
-      const result = await source.parse(htmlFiles);
+      // Create a test HTML with comma-separated summit name
+      const htmlWithCommaSeparatedName = `
+        <html><body><table>
+        <tr>
+          <td>1</td>
+          <td>Seehorn, Großes</td>
+          <td><a href="/wege/details.php?wegnr=1001">Test Route</a></td>
+          <td><img src="/img/arrow-upright.gif" alt="1" /></td>
+          <td>V</td>
+          <td>Test Region</td>
+        </tr>
+        </table></body></html>
+      `;
+
+      // Write test HTML to temp file
+      const testHtmlPath = path.join(tempDir, "comma-test.html");
+      await fs.writeFile(testHtmlPath, htmlWithCommaSeparatedName);
+
+      // Create source with test HTML
+      const testSource = new TeufelsturmRoutesSource(
+        { inputFiles: [testHtmlPath], cache: { enabled: false } },
+        mockLogger,
+        cache
+      );
+
+      const htmlFiles = await testSource.fetch();
+      const result = await testSource.parse(htmlFiles);
 
       const summit = result.summits.find((s) => s.name === "Großes Seehorn");
       expect(summit).toBeDefined();

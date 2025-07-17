@@ -23,7 +23,7 @@ async function main() {
 
   // Simple configuration
   const config = {
-    inputFile: "../data-proccessing/input/points.geojson",
+    inputFile: "input-data/points.geojson",
   };
 
   try {

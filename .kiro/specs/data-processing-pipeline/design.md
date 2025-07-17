@@ -278,11 +278,7 @@ class BaseImporter {
   },
   "cache": {
     "enabled": true,
-    "file": {
-      "enabled": true,
-      "path": "./cache",
-      "ttl": 86400
-    }
+    "path": "./cache"
   },
   "logging": {
     "level": "info",
@@ -436,15 +432,7 @@ class ConfigManager {
 {
   "cache": {
     "enabled": true,
-    "cacheDir": "./cache",
-    "sources": {
-      "teufelsturm": {
-        "enabled": true
-      },
-      "osm": {
-        "enabled": true
-      }
-    }
+    "path": "./cache"
   }
 }
 ```

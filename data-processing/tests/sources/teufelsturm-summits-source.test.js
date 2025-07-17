@@ -1,6 +1,6 @@
 const TeufelsturmSummitsSource = require("../../lib/sources/teufelsturm-summits-source");
 const SimpleCache = require("../../lib/core/simple-cache");
-const Logger = require("../../lib/core/logger");
+const ProcessingError = require("../../lib/core/error");
 const fs = require("fs").promises;
 const path = require("path");
 
@@ -9,6 +9,7 @@ describe("TeufelsturmSummitsSource", () => {
   let mockLogger;
   let mockCache;
   let testConfig;
+  let fixtureFile;
 
   beforeEach(() => {
     mockLogger = {
@@ -25,9 +26,14 @@ describe("TeufelsturmSummitsSource", () => {
       isSourceNewer: jest.fn(),
     };
 
+    // Use test fixture file
+    fixtureFile = path.join(
+      __dirname,
+      "../fixtures/sample-teufelsturm-summits.html"
+    );
+
     testConfig = {
-      inputFile:
-        "data-processing/tests/fixtures/sample-teufelsturm-summits.html",
+      inputFile: fixtureFile,
       cache: {
         enabled: true,
       },
@@ -35,6 +41,52 @@ describe("TeufelsturmSummitsSource", () => {
 
     source = new TeufelsturmSummitsSource(testConfig, mockLogger);
     source.cache = mockCache;
+  });
+
+  describe("constructor", () => {
+    test("should throw error when no input files configured", () => {
+      expect(() => {
+        new TeufelsturmSummitsSource({}, mockLogger, mockCache);
+      }).toThrow(ProcessingError);
+      expect(() => {
+        new TeufelsturmSummitsSource({}, mockLogger, mockCache);
+      }).toThrow(
+        "TeufelsturmSummitsSource requires either inputFile or inputFiles to be configured"
+      );
+    });
+
+    test("should use provided single file configuration", () => {
+      const config = {
+        inputFile: "/custom/path/summits.html",
+        cache: { enabled: false },
+      };
+      const source = new TeufelsturmSummitsSource(
+        config,
+        mockLogger,
+        mockCache
+      );
+
+      expect(source.inputFiles).toEqual(["/custom/path/summits.html"]);
+      expect(source.cacheEnabled).toBe(false);
+    });
+
+    test("should use provided multiple files configuration", () => {
+      const config = {
+        inputFiles: ["/path/file1.html", "/path/file2.html"],
+        cache: { enabled: true },
+      };
+      const source = new TeufelsturmSummitsSource(
+        config,
+        mockLogger,
+        mockCache
+      );
+
+      expect(source.inputFiles).toEqual([
+        "/path/file1.html",
+        "/path/file2.html",
+      ]);
+      expect(source.cacheEnabled).toBe(true);
+    });
   });
 
   describe("processHtmlFile", () => {
@@ -214,7 +266,14 @@ describe("TeufelsturmSummitsSource", () => {
         </table>
       `;
 
-      const result = await source.parse(htmlContent);
+      const fileDataArray = [
+        {
+          filePath: testConfig.inputFile,
+          content: htmlContent,
+        },
+      ];
+
+      const result = await source.parse(fileDataArray);
 
       expect(result).toHaveProperty("regions");
       expect(result).toHaveProperty("summits");
@@ -314,8 +373,15 @@ describe("TeufelsturmSummitsSource", () => {
       const cachedData = {
         regions: [{ name: "Cached Region" }],
         summits: [{ name: "Cached Summit", region: "Cached Region" }],
+        metadata: {
+          processedAt: new Date("2023-01-01T00:00:00.000Z"),
+          totalProcessed: 1,
+          sourceFiles: [fixtureFile],
+        },
       };
 
+      // Mock cache to indicate data is available and up-to-date
+      mockCache.isSourceNewer.mockResolvedValue(false);
       mockCache.get.mockResolvedValue(cachedData);
 
       const result = await source.process();
@@ -327,7 +393,7 @@ describe("TeufelsturmSummitsSource", () => {
     });
 
     it("should cache processed data", async () => {
-      // Mock fetch to return HTML content directly
+      // Mock fetch to return HTML content in correct format
       const mockHtmlContent = `
         <table>
           <tr>
@@ -339,8 +405,15 @@ describe("TeufelsturmSummitsSource", () => {
         </table>
       `;
 
+      const mockFileDataArray = [
+        {
+          filePath: "test.html",
+          content: mockHtmlContent,
+        },
+      ];
+
       // Mock the fetch method and cache methods
-      source.fetch = jest.fn().mockResolvedValue(mockHtmlContent);
+      source.fetch = jest.fn().mockResolvedValue(mockFileDataArray);
       mockCache.get.mockResolvedValue(null); // No cached data
       mockCache.isSourceNewer.mockResolvedValue(true); // Source is newer
 
@@ -376,6 +449,21 @@ describe("TeufelsturmSummitsSource", () => {
       );
 
       expect(source1.getCacheKey()).not.toBe(source2.getCacheKey());
+    });
+  });
+
+  describe("getSourceFiles", () => {
+    test("should return input file path", () => {
+      const inputFile = "/test/summits.html";
+      const source = new TeufelsturmSummitsSource(
+        { inputFile },
+        mockLogger,
+        mockCache
+      );
+
+      const sourceFiles = source.getSourceFiles();
+
+      expect(sourceFiles).toEqual([inputFile]);
     });
   });
 });

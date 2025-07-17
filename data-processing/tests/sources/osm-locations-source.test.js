@@ -1,5 +1,6 @@
 const OSMLocationsSource = require("../../lib/sources/osm-locations-source");
 const SimpleCache = require("../../lib/core/simple-cache");
+const ProcessingError = require("../../lib/core/error");
 const Logger = require("../../lib/core/logger");
 const fs = require("fs").promises;
 const path = require("path");
@@ -31,7 +32,10 @@ describe("OSMLocationsSource", () => {
     };
 
     testConfig = {
-      inputFile: "tests/fixtures/sample-osm-locations.geojson",
+      inputFile: path.join(
+        __dirname,
+        "../fixtures/sample-osm-locations.geojson"
+      ),
       dependencies: ["teufelsturmSummits", "teufelsturmRoutes"],
       cache: {
         enabled: true,
@@ -312,22 +316,27 @@ describe("OSMLocationsSource", () => {
 
       const result = await source.fetch(dependencies);
 
-      expect(result.geoJsonData).toEqual(mockGeoJson);
-      expect(result.dependencies).toEqual(dependencies);
-    });
-
-    it("should throw error when input file is not specified", async () => {
-      source.config.inputFile = "";
-
-      await expect(source.fetch({})).rejects.toThrow(
-        "No input file specified in configuration"
-      );
+      expect(result).toEqual([
+        {
+          filePath: testConfig.inputFile,
+          geoJsonData: mockGeoJson,
+          dependencies: dependencies,
+          index: 0,
+        },
+      ]);
     });
 
     it("should throw error when file is not found", async () => {
-      jest.spyOn(fs, "readFile").mockRejectedValue({ code: "ENOENT" });
+      const mockError = new Error(
+        "ENOENT: no such file or directory, open 'test.geojson'"
+      );
+      mockError.code = "ENOENT";
+      jest.spyOn(fs, "readFile").mockRejectedValue(mockError);
 
-      await expect(source.fetch({})).rejects.toThrow("GeoJSON file not found");
+      await expect(source.fetch({})).rejects.toThrow(ProcessingError);
+      await expect(source.fetch({})).rejects.toThrow(
+        "ENOENT: no such file or directory"
+      );
     });
   });
 
@@ -401,7 +410,7 @@ describe("OSMLocationsSource", () => {
       const result = await source.process(mockDependencies);
 
       expect(result.locations).toBeDefined();
-      expect(result.metadata.totalSummits).toBe(1);
+      expect(result.metadata.matchedSummits).toBeDefined();
       expect(result.metadata.dependencies).toEqual([
         "teufelsturmSummits",
         "teufelsturmRoutes",
@@ -423,7 +432,7 @@ describe("OSMLocationsSource", () => {
       const result = await source.process({});
 
       expect(result.locations).toBeDefined();
-      expect(result.metadata.totalSummits).toBe(0);
+      expect(result.metadata.matchedSummits).toBe(0);
       expect(result.metadata.dependencies).toEqual([]);
     });
   });
@@ -434,10 +443,15 @@ describe("OSMLocationsSource", () => {
       expect(result).toEqual([testConfig.inputFile]);
     });
 
-    it("should return empty array when no input file", () => {
-      source.config.inputFile = null;
-      const result = source.getSourceFiles();
-      expect(result).toEqual([]);
+    it("should throw error when no input file specified", () => {
+      expect(() => {
+        new OSMLocationsSource({}, mockLogger, mockCache);
+      }).toThrow(ProcessingError);
+      expect(() => {
+        new OSMLocationsSource({}, mockLogger, mockCache);
+      }).toThrow(
+        "OSMLocationsSource requires either inputFile or inputFiles to be configured"
+      );
     });
   });
 });

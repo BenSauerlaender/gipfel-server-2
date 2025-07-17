@@ -299,6 +299,8 @@ class DataProcessor {
       teufelsturmRoutes: "TeufelsturmRoutesSource",
       teufelsturmSummits: "TeufelsturmSummitsSource",
       osmLocations: "OSMLocationsSource",
+      routes: "RoutesSource",
+      ascents: "AscentsSource",
     };
 
     const className = sourceClassMap[sourceName];

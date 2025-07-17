@@ -3,44 +3,38 @@
     "climbers": {
       "enabled": true,
       "config": {
-        "inputFile": "input/climbers.json"
+        "inputFile": "input-data/climbers.json"
       }
     },
     "teufelsturmRoutes": {
       "enabled": true,
       "config": {
-        "inputFiles": [
-          "input/teufelsturm/wege1.html",
-          "input/teufelsturm/wege2.html"
-        ]
+        "inputFiles": ["input-data/wege1.html", "input-data/wege2.html"]
       }
     },
     "teufelsturmSummits": {
       "enabled": true,
       "config": {
-        "inputFiles": [
-          "input/teufelsturm/wege1.html",
-          "input/teufelsturm/wege2.html"
-        ]
+        "inputFile": "input-data/tt.summits.html"
       }
     },
     "osmLocations": {
       "enabled": true,
       "config": {
-        "inputFile": "input/points.geojson",
+        "inputFile": "input-data/points.geojson",
         "dependencies": ["teufelsturmSummits"]
       }
     },
     "routes": {
       "enabled": true,
       "config": {
-        "inputFile": "input/routes.json"
+        "inputFile": "input-data/routes.json"
       }
     },
     "ascents": {
       "enabled": true,
       "config": {
-        "inputFile": "input/ascents.json"
+        "inputFile": "input-data/ascents.json"
       }
     }
   },
@@ -50,8 +44,8 @@
       "enabled": true,
       "config": {
         "collections": {
-          "regions": ["teufelsturmSummits", "regions"],
-          "summits": ["teufelsturmSummits", "routes", "osmLocations"],
+          "regions": ["teufelsturmSummits"],
+          "summits": ["teufelsturmSummits", "osmLocations"],
           "routes": ["teufelsturmRoutes", "routes"],
           "climbers": ["climbers"],
           "ascents": ["ascents"]
@@ -61,11 +55,7 @@
   },
   "cache": {
     "enabled": true,
-    "file": {
-      "enabled": true,
-      "path": "./cache",
-      "ttl": 86400
-    }
+    "path": "./cache"
   },
   "logging": {
     "level": "info",

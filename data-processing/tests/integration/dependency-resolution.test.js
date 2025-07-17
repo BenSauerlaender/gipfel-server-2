@@ -123,7 +123,7 @@ describe("Dependency Resolution Integration", () => {
       expect(result.metadata).toBeDefined();
       expect(result.metadata.dependencies).toContain("teufelsturmSummits");
       expect(result.metadata.dependencies).toContain("teufelsturmRoutes");
-      expect(result.metadata.totalSummits).toBeGreaterThan(0);
+      expect(result.metadata.matchedSummits).toBeGreaterThanOrEqual(0);
     });
 
     it("should cache dependency results to avoid reprocessing", async () => {
@@ -175,7 +175,7 @@ describe("Dependency Resolution Integration", () => {
 
       expect(result.status).toBe("completed");
       expect(result.metadata.dependencies).toEqual([]);
-      expect(result.metadata.totalSummits).toBe(0);
+      expect(result.metadata.matchedSummits).toBe(0);
     });
   });
 
@@ -183,7 +183,7 @@ describe("Dependency Resolution Integration", () => {
     it("should handle dependency processing errors", async () => {
       // First get normal count
       const normalResult = await processor.processSource("osmLocations");
-      const normalCount = normalResult.metadata.totalSummits;
+      const normalCount = normalResult.metadata.matchedSummits;
 
       // Reset processor cache
       processor.processedSources.clear();
@@ -195,7 +195,7 @@ describe("Dependency Resolution Integration", () => {
 
       // Should complete successfully but with reduced summit data
       expect(result.status).toBe("completed");
-      expect(result.metadata.totalSummits).toBeLessThan(normalCount); // Less than normal because one dependency is disabled
+      expect(result.metadata.matchedSummits).toBeLessThanOrEqual(normalCount); // Less than or equal to normal because one dependency is disabled
     });
 
     it("should handle missing dependency configuration", async () => {

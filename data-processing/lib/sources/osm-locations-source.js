@@ -1,66 +1,71 @@
 const fs = require("fs").promises;
 const BaseSource = require("./base-source");
 const ProcessingError = require("../core/error");
+const ErrorHandler = require("../core/error-handler");
 
 /**
  * OSM locations data source handler
  * Processes GeoJSON Point data from OSM and matches names with summit data from dependencies
  */
 class OSMLocationsSource extends BaseSource {
-  constructor(config, logger, cache) {
+  constructor(config, logger, cache = null) {
     super(config, logger, cache);
+
+    // Validate that input files are configured
+    if (!config.inputFile && !config.inputFiles) {
+      throw new ProcessingError(
+        "OSMLocationsSource requires either inputFile or inputFiles to be configured",
+        ProcessingError.Categories.CONFIG_ERROR,
+        this.sourceName,
+        { config }
+      );
+    }
+
+    // Always use inputFiles array, wrap single file if needed
+    this.inputFiles = config.inputFiles || [config.inputFile];
   }
 
   /**
-   * Fetch GeoJSON content from configured input file
+   * Fetch GeoJSON content from configured input files
    * @param {Object} dependencies - Resolved dependency data
-   * @returns {Promise<Object>} Object containing GeoJSON data and dependencies
+   * @returns {Promise<Array>} Array of file data objects with dependencies
    */
   async fetch(dependencies = {}) {
-    this.logProgress("fetch", "Loading GeoJSON file");
+    this.logProgress(
+      "fetch",
+      `Loading ${this.inputFiles.length} GeoJSON files`
+    );
 
-    const inputFile = this.config.inputFile || "";
+    const fileDataArray = [];
+    for (let i = 0; i < this.inputFiles.length; i++) {
+      const filePath = this.inputFiles[i];
+      try {
+        this.logger.debug(`Reading GeoJSON file: ${filePath}`);
+        const geoJsonContent = await fs.readFile(filePath, "utf8");
+        const geoJsonData = JSON.parse(geoJsonContent);
 
-    if (!inputFile) {
-      throw new ProcessingError(
-        "No input file specified in configuration",
-        ProcessingError.Categories.SOURCE_ERROR,
-        this.sourceName,
-        { inputFile }
-      );
-    }
+        fileDataArray.push({
+          filePath,
+          geoJsonData,
+          dependencies,
+          index: i,
+        });
 
-    try {
-      // Read main GeoJSON file
-      this.logger.debug(`Reading GeoJSON file: ${inputFile}`);
-      const geoJsonContent = await fs.readFile(inputFile, "utf8");
-      const geoJsonData = JSON.parse(geoJsonContent);
-
-      this.logProgress(
-        "fetch",
-        `Loaded GeoJSON with ${geoJsonData.features?.length || 0} features`
-      );
-
-      return {
-        geoJsonData,
-        dependencies,
-      };
-    } catch (error) {
-      if (error.code === "ENOENT") {
-        throw new ProcessingError(
-          `GeoJSON file not found: ${inputFile}`,
+        this.logProgress(
+          "fetch",
+          `Loaded GeoJSON with ${geoJsonData.features?.length || 0} features from ${filePath}`
+        );
+      } catch (error) {
+        throw ErrorHandler.wrapError(
+          error,
           ProcessingError.Categories.SOURCE_ERROR,
           this.sourceName,
-          { inputFile }
+          { inputFile: filePath }
         );
       }
-      throw new ProcessingError(
-        `Failed to read GeoJSON file ${inputFile}: ${error.message}`,
-        ProcessingError.Categories.SOURCE_ERROR,
-        this.sourceName,
-        { inputFile, error: error.message }
-      );
     }
+
+    return fileDataArray;
   }
 
   /**
@@ -102,66 +107,81 @@ class OSMLocationsSource extends BaseSource {
 
   /**
    * Parse GeoJSON data and match summits to climbing locations
-   * @param {Object} rawData - Object containing geoJsonData and dependencies
+   * @param {Array} fileDataArray - Array of file data objects
    * @param {Object} dependencies - Resolved dependency data (unused but required by interface)
    * @returns {Promise<Object>} Parsed location data with matched summits
    */
-  async parse(rawData, dependencies = {}) {
+  async parse(fileDataArray, dependencies = {}) {
     try {
       this.logProgress(
         "parse",
         "Parsing GeoJSON and matching summits to climbing locations"
       );
 
-      const { geoJsonData, dependencies: deps } = rawData;
+      const allMatchedSummits = [];
+      const sourceFiles = [];
+      let totalFeatures = 0;
+      let totalClimbingPoints = 0;
 
-      if (!geoJsonData.features || !Array.isArray(geoJsonData.features)) {
-        throw new ProcessingError(
-          "Invalid GeoJSON: features array not found",
-          ProcessingError.Categories.PARSE_ERROR,
-          this.sourceName
+      // Process each file
+      for (const fileData of fileDataArray) {
+        const { filePath, geoJsonData, dependencies: deps } = fileData;
+        sourceFiles.push(filePath);
+
+        if (!geoJsonData.features || !Array.isArray(geoJsonData.features)) {
+          throw new ProcessingError(
+            `Invalid GeoJSON in ${filePath}: features array not found`,
+            ProcessingError.Categories.PARSE_ERROR,
+            this.sourceName,
+            { filePath }
+          );
+        }
+
+        totalFeatures += geoJsonData.features.length;
+
+        // Combine and validate dependencies
+        const summitData = this.combineDependencies(deps);
+
+        // Filter for Point features with climbing tags
+        const climbingPoints = this.filterClimbingPoints(geoJsonData.features);
+        totalClimbingPoints += climbingPoints.length;
+        this.logger.debug(
+          `Filtered to ${climbingPoints.length} climbing Point features from ${filePath}`
         );
+
+        // Match summits to climbing points (not points to summits)
+        const matchedSummits = this.matchSummitsToPoints(
+          summitData,
+          climbingPoints
+        );
+        allMatchedSummits.push(...matchedSummits);
       }
 
-      // Combine and validate dependencies
-      const summitData = this.combineDependencies(deps);
-
-      // Filter for Point features with climbing tags
-      const climbingPoints = this.filterClimbingPoints(geoJsonData.features);
-      this.logger.debug(
-        `Filtered to ${climbingPoints.length} climbing Point features`
-      );
-
-      // Match summits to climbing points (not points to summits)
-      const matchedSummits = this.matchSummitsToPoints(
-        summitData,
-        climbingPoints
-      );
-
       const result = {
-        locations: matchedSummits,
+        locations: allMatchedSummits,
         metadata: {
-          totalFeatures: geoJsonData.features.length,
-          climbingPoints: climbingPoints.length,
-          totalSummits: summitData.length,
-          matchedSummits: matchedSummits.length,
+          totalFeatures: totalFeatures,
+          climbingPoints: totalClimbingPoints,
+          matchedSummits: allMatchedSummits.length,
           processedAt: new Date(),
-          sourceFiles: this.getSourceFiles(),
-          dependencies: Object.keys(deps),
+          sourceFiles: sourceFiles,
+          dependencies:
+            fileDataArray.length > 0
+              ? Object.keys(fileDataArray[0].dependencies)
+              : [],
         },
       };
 
       this.logProgress(
         "parse",
-        `Processed ${matchedSummits.length} summits with climbing location matches`
+        `Processed ${allMatchedSummits.length} summits with climbing location matches from ${fileDataArray.length} files`
       );
       return result;
     } catch (error) {
-      throw new ProcessingError(
-        `Failed to parse GeoJSON content: ${error.message}`,
+      throw ErrorHandler.wrapError(
+        error,
         ProcessingError.Categories.PARSE_ERROR,
-        this.sourceName,
-        { error: error.message }
+        this.sourceName
       );
     }
   }
@@ -396,7 +416,7 @@ class OSMLocationsSource extends BaseSource {
    * @returns {Array} Array of source file paths
    */
   getSourceFiles() {
-    return this.config.inputFile ? [this.config.inputFile] : [];
+    return this.inputFiles;
   }
 }
 

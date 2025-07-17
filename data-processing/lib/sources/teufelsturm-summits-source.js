@@ -1,6 +1,7 @@
 const fs = require("fs").promises;
 const BaseSource = require("./base-source");
 const ProcessingError = require("../core/error");
+const ErrorHandler = require("../core/error-handler");
 const fixSummitName = require("../util/fixSummitName");
 const cheerio = require("cheerio");
 
@@ -9,88 +10,104 @@ const cheerio = require("cheerio");
  * Processes HTML files from Teufelsturm website to extract climbing summit data
  */
 class TeufelsturmSummitsSource extends BaseSource {
-  constructor(config, logger, cache, processor) {
-    super(config, logger, cache, processor);
+  constructor(config, logger, cache = null) {
+    super(config, logger, cache);
+
+    // Validate that input files are configured
+    if (!config.inputFile && !config.inputFiles) {
+      throw new ProcessingError(
+        "TeufelsturmSummitsSource requires either inputFile or inputFiles to be configured",
+        ProcessingError.Categories.CONFIG_ERROR,
+        this.sourceName,
+        { config }
+      );
+    }
+
+    // Always use inputFiles array, wrap single file if needed
+    this.inputFiles = config.inputFiles || [config.inputFile];
   }
 
   /**
-   * Fetch HTML content from configured input file
-   * @returns {Promise<String>} HTML content from file
+   * Fetch HTML content from configured input files
+   * @param {Object} dependencies - Resolved dependency data (unused by this source)
+   * @returns {Promise<Array>} Array of file data objects
    */
-  async fetch() {
-    this.logProgress("fetch", "Loading HTML file");
+  async fetch(dependencies = {}) {
+    this.logProgress("fetch", `Loading ${this.inputFiles.length} HTML files`);
 
-    const inputFile = this.config.inputFile || "";
-
-    if (!inputFile) {
-      throw new ProcessingError(
-        "No input file specified in configuration",
-        ProcessingError.Categories.SOURCE_ERROR,
-        this.sourceName,
-        { inputFile }
-      );
-    }
-
-    try {
-      this.logger.debug(`Reading file: ${inputFile}`);
-      const content = await fs.readFile(inputFile, "utf8");
-      this.logProgress("fetch", `Loaded HTML file`);
-      return content;
-    } catch (error) {
-      if (error.code === "ENOENT") {
-        throw new ProcessingError(
-          `File not found: ${inputFile}`,
+    const fileDataArray = [];
+    for (let i = 0; i < this.inputFiles.length; i++) {
+      const filePath = this.inputFiles[i];
+      try {
+        this.logger.debug(`Reading file: ${filePath}`);
+        const content = await fs.readFile(filePath, "utf8");
+        fileDataArray.push({
+          filePath,
+          content,
+          index: i,
+        });
+        this.logProgress("fetch", `Loaded HTML file from ${filePath}`);
+      } catch (error) {
+        throw ErrorHandler.wrapError(
+          error,
           ProcessingError.Categories.SOURCE_ERROR,
           this.sourceName,
-          { inputFile }
+          { inputFile: filePath }
         );
       }
-      throw new ProcessingError(
-        `Failed to read file ${inputFile}: ${error.message}`,
-        ProcessingError.Categories.SOURCE_ERROR,
-        this.sourceName,
-        { inputFile, error: error.message }
-      );
     }
+    return fileDataArray;
   }
 
   /**
    * Parse HTML content to extract summit data
-   * @param String htmlContent - downloaded html
+   * @param {Array} fileDataArray - Array of file data objects
+   * @param {Object} dependencies - Resolved dependency data (unused by this source)
    * @returns {Promise<Object>} Parsed summit data with regions and summits
    */
-  async parse(htmlContent) {
+  async parse(fileDataArray, dependencies = {}) {
     try {
       this.logProgress("parse", "Parsing HTML content");
-      const summits = await this.processHtmlFile(htmlContent);
 
-      this.logger.debug(`Extracted ${summits.length} summits`);
+      const allSummits = [];
+      const sourceFiles = [];
+
+      for (const fileData of fileDataArray) {
+        const { filePath, content } = fileData;
+        sourceFiles.push(filePath);
+
+        const summits = await this.processHtmlFile(content);
+        allSummits.push(...summits);
+
+        this.logger.debug(
+          `Extracted ${summits.length} summits from ${filePath}`
+        );
+      }
 
       // Extract unique regions and summits
-      const uniqueRegions = this.extractUniqueRegions(summits);
-      const uniqueSummits = this.extractUniqueSummits(summits);
+      const uniqueRegions = this.extractUniqueRegions(allSummits);
+      const uniqueSummits = this.extractUniqueSummits(allSummits);
 
       const result = {
         regions: uniqueRegions,
         summits: uniqueSummits,
         metadata: {
-          totalProcessed: summits.length,
+          totalProcessed: allSummits.length,
           processedAt: new Date(),
-          sourceFiles: this.getSourceFiles(),
+          sourceFiles: sourceFiles,
         },
       };
 
       this.logProgress(
         "parse",
-        `Extracted ${uniqueRegions.length} regions, ${uniqueSummits.length} summits`
+        `Extracted ${uniqueRegions.length} regions, ${uniqueSummits.length} summits from ${fileDataArray.length} files`
       );
       return result;
     } catch (error) {
-      throw new ProcessingError(
-        `Failed to parse HTML content: ${error.message}`,
+      throw ErrorHandler.wrapError(
+        error,
         ProcessingError.Categories.PARSE_ERROR,
-        this.sourceName,
-        { error: error.message }
+        this.sourceName
       );
     }
   }
@@ -348,56 +365,11 @@ class TeufelsturmSummitsSource extends BaseSource {
   }
 
   /**
-   * Process data with caching support
-   * @returns {Promise<Object>} Processed data
-   */
-  async process() {
-    const cacheKey = this.getCacheKey();
-
-    // Check cache first
-    if (this.cacheEnabled && this.cache) {
-      const sourceFiles = this.getSourceFiles();
-      const isSourceNewer = await this.cache.isSourceNewer(
-        cacheKey,
-        sourceFiles
-      );
-
-      if (!isSourceNewer) {
-        const cached = await this.cache.get(cacheKey);
-        if (cached) {
-          this.logger.debug(`Using cached data for ${this.sourceName}`);
-          return cached;
-        }
-      }
-    }
-
-    // Process data
-    this.logProgress("process", "Starting data processing");
-    const rawData = await this.fetch();
-    const parsedData = await this.parse(rawData);
-    const validatedData = await this.validate(parsedData);
-
-    // Cache result
-    if (this.cacheEnabled && this.cache) {
-      try {
-        await this.cache.set(cacheKey, validatedData);
-        this.logger.debug(`Cached data with key: ${cacheKey}`);
-      } catch (error) {
-        this.logger.warn("Failed to cache data:", error.message);
-        // Don't fail the entire process if caching fails
-      }
-    }
-
-    this.logProgress("process", "Data processing completed");
-    return validatedData;
-  }
-
-  /**
    * Get source files that this processor depends on
    * @returns {Array} Array of source file paths
    */
   getSourceFiles() {
-    return this.config.inputFile ? [this.config.inputFile] : [];
+    return this.inputFiles;
   }
 }
 

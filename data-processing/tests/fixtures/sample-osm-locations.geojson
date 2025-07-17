@@ -1,117 +1,68 @@
 {
   "type": "FeatureCollection",
+  "name": "test_points",
+  "crs": {
+    "type": "name",
+    "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" }
+  },
   "features": [
     {
       "type": "Feature",
       "properties": {
-        "name": "Kletterfelsen Testgebiet",
-        "climbing": "yes",
-        "sport": "rock_climbing",
-        "description": "Popular climbing area with multiple routes"
+        "osm_id": "251442891",
+        "name": "Test Summit 1",
+        "other_tags": "\"climbing:grade:saxon:min\"=>\"IV\",\"climbing:rock\"=>\"sandstone\",\"climbing:summit_log\"=>\"yes\",\"climbing:trad\"=>\"yes\",\"natural\"=>\"peak\",\"sport\"=>\"climbing\""
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [13.405, 52.52]
+        "coordinates": [14.2369381, 50.908549]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "name": "Alpine Peak Test",
-        "natural": "peak",
-        "ele": "2500",
-        "climbing": "alpine"
+        "osm_id": "251874399",
+        "name": "Test Summit 2",
+        "other_tags": "\"climbing:grade:saxon:min\"=>\"I\",\"climbing:rock\"=>\"sandstone\",\"climbing:summit_log\"=>\"yes\",\"climbing:trad\"=>\"yes\",\"natural\"=>\"peak\",\"sport\"=>\"climbing\""
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [11.2583, 47.4239]
+        "coordinates": [14.0786758, 50.9011235]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "name": "Bouldering Area",
-        "sport": "bouldering",
-        "surface": "rock"
+        "osm_id": "251874400",
+        "name": "Another Test Summit",
+        "other_tags": "\"climbing:grade:saxon:min\"=>\"V\",\"climbing:rock\"=>\"sandstone\",\"climbing:summit_log\"=>\"yes\",\"climbing:trad\"=>\"yes\",\"importance\"=>\"1.0\",\"natural\"=>\"peak\",\"sport\"=>\"climbing\""
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [8.5417, 47.3769]
+        "coordinates": [14.1112993, 50.900833]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "name": "Regular Park",
-        "leisure": "park",
-        "access": "public"
+        "osm_id": "25509584",
+        "name": "Non-climbing Point",
+        "other_tags": "\"bus\"=>\"yes\",\"public_transport\"=>\"stop_position\""
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [13.3777, 52.5162]
+        "coordinates": [13.9377055, 50.9671703]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "name": "Climbing Gym Indoor",
-        "leisure": "sports_centre",
-        "sport": "climbing",
-        "climbing": "sport"
+        "osm_id": "27298849",
+        "name": "Point Without Climbing Tags"
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [13.4194, 52.5069]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "name": "Traditional Climbing Crag",
-        "climbing": "traditional",
-        "rock": "limestone"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [12.3731, 47.8021]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "name": "Summit Without Climbing",
-        "natural": "peak",
-        "ele": "1800"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [10.7461, 46.948]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "name": "Polygon Climbing Area",
-        "climbing": "yes",
-        "area": "yes"
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [13.4, 52.515],
-            [13.41, 52.515],
-            [13.41, 52.525],
-            [13.4, 52.525],
-            [13.4, 52.515]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "name": "Feature Without Coordinates"
+        "coordinates": [14.2054057, 50.8888871]
       }
     }
   ]

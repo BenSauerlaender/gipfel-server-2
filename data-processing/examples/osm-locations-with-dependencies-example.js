@@ -26,7 +26,7 @@ async function main() {
     // First, get summit data from Teufelsturm source
     console.log("=== Step 1: Loading Summit Data ===");
     const summitsConfig = {
-      inputFile: "../data-proccessing/output/tt.summits.html",
+      inputFile: "input-data/tt.summits.html",
     };
 
     const summitsSource = new TeufelsturmSummitsSource(
@@ -43,7 +43,7 @@ async function main() {
     // Now process OSM locations with summit dependencies
     console.log("\n=== Step 2: Processing OSM Locations ===");
     const osmConfig = {
-      inputFile: "../data-proccessing/input/points.geojson",
+      inputFile: "input-data/points.geojson",
     };
 
     const osmSource = new OSMLocationsSource(osmConfig, logger, cache);
@@ -60,7 +60,7 @@ async function main() {
     console.log("\n=== Results ===");
     console.log(`Total OSM features: ${result.metadata.totalFeatures}`);
     console.log(`Climbing points: ${result.metadata.climbingPoints}`);
-    console.log(`Total summits: ${result.metadata.totalSummits}`);
+    console.log(`Total summits: ${result.metadata.matchedSummits}`);
     console.log(`Matched locations: ${result.locations.length}`);
     console.log(`Processed at: ${result.metadata.processedAt}`);
 

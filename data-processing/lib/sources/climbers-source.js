@@ -1,111 +1,139 @@
 const fs = require("fs").promises;
 const BaseSource = require("./base-source");
 const ProcessingError = require("../core/error");
+const ErrorHandler = require("../core/error-handler");
 
 /**
  * Climbers data source handler
  * Processes climbers data from JSON file with caching support
  */
 class ClimbersSource extends BaseSource {
-  constructor(config, logger, cache, processor) {
-    super(config, logger, cache, processor);
-    this.inputFile = config.inputFile || "data-proccessing/input/climbers.json";
+  constructor(config, logger, cache = null) {
+    super(config, logger, cache);
+
+    // Validate that input files are configured
+    if (!config.inputFile && !config.inputFiles) {
+      throw new ProcessingError(
+        "ClimbersSource requires either inputFile or inputFiles to be configured",
+        ProcessingError.Categories.CONFIG_ERROR,
+        this.sourceName,
+        { config }
+      );
+    }
+
+    // Always use inputFiles array, wrap single file if needed
+    this.inputFiles = config.inputFiles || [config.inputFile];
   }
 
   /**
-   * Fetch raw climbers data from JSON file
-   * @returns {Promise<string>} Raw JSON string
+   * Fetch raw climbers data from JSON files
+   * @param {Object} dependencies - Resolved dependency data (unused by this source)
+   * @returns {Promise<Array>} Array of file data objects
    * @throws {ProcessingError} When file cannot be read
    */
-  async fetch() {
-    this.logProgress("fetch", `Reading climbers data from ${this.inputFile}`);
+  async fetch(dependencies = {}) {
+    this.logProgress(
+      "fetch",
+      `Reading climbers data from ${this.inputFiles.length} files`
+    );
 
-    try {
-      const rawData = await fs.readFile(this.inputFile, "utf8");
-      this.logProgress(
-        "fetch",
-        `Successfully read ${rawData.length} characters from file`
-      );
-      return rawData;
-    } catch (error) {
-      const errorMsg = `Failed to read climbers file: ${error.message}`;
-      this.logError("fetch", error);
-      throw new ProcessingError(
-        errorMsg,
-        ProcessingError.Categories.SOURCE_ERROR,
-        this.sourceName,
-        { inputFile: this.inputFile, originalError: error.message }
-      );
+    const fileDataArray = [];
+    for (let i = 0; i < this.inputFiles.length; i++) {
+      const filePath = this.inputFiles[i];
+      try {
+        const rawData = await fs.readFile(filePath, "utf8");
+        fileDataArray.push({
+          filePath,
+          rawData,
+          index: i,
+        });
+        this.logProgress(
+          "fetch",
+          `Successfully read ${rawData.length} characters from ${filePath}`
+        );
+      } catch (error) {
+        throw ErrorHandler.wrapError(
+          error,
+          ProcessingError.Categories.SOURCE_ERROR,
+          this.sourceName,
+          { inputFile: filePath }
+        );
+      }
     }
+    return fileDataArray;
   }
 
   /**
    * Parse raw JSON data into structured climbers object with metadata
-   * @param {string} rawData - Raw JSON string
+   * @param {Array} fileDataArray - Array of file data objects
+   * @param {Object} dependencies - Resolved dependency data (unused by this source)
    * @returns {Promise<Object>} Object with climbers array and metadata
    * @throws {ProcessingError} When JSON parsing fails
    */
-  async parse(rawData) {
+  async parse(fileDataArray, dependencies = {}) {
     this.logProgress("parse", "Parsing climbers JSON data");
 
     try {
-      const climbersArray = JSON.parse(rawData);
+      const allClimbers = [];
+      const sourceFiles = [];
 
-      if (!Array.isArray(climbersArray)) {
-        throw new ProcessingError(
-          "Climbers data must be an array",
-          ProcessingError.Categories.PARSE_ERROR,
-          this.sourceName,
-          { dataType: typeof climbersArray }
-        );
-      }
+      for (const fileData of fileDataArray) {
+        const { filePath, rawData } = fileData;
+        sourceFiles.push(filePath);
 
-      // Parse climber names into firstName and lastName objects
-      const parsedClimbers = climbersArray.map((climberName, index) => {
-        if (typeof climberName !== "string") {
-          throw new ProcessingError(
-            `Climber name at index ${index} must be a string`,
+        const climbersArray = JSON.parse(rawData);
+
+        if (!Array.isArray(climbersArray)) {
+          throw ErrorHandler.createError(
+            `Climbers data in ${filePath} must be an array`,
             ProcessingError.Categories.PARSE_ERROR,
             this.sourceName,
-            { index, value: climberName, type: typeof climberName }
+            { filePath, dataType: typeof climbersArray }
           );
         }
 
-        const trimmedName = climberName.trim();
-        const nameParts = trimmedName.split(" ");
+        // Parse climber names into firstName and lastName objects
+        const parsedClimbers = climbersArray.map((climberName, index) => {
+          if (typeof climberName !== "string") {
+            throw ErrorHandler.createError(
+              `Climber name at index ${index} in ${filePath} must be a string`,
+              ProcessingError.Categories.PARSE_ERROR,
+              this.sourceName,
+              { filePath, index, value: climberName, type: typeof climberName }
+            );
+          }
 
-        return {
-          firstName: nameParts[0] || "",
-          lastName: nameParts.slice(1).join(" ") || "",
-        };
-      });
+          const trimmedName = climberName.trim();
+          const nameParts = trimmedName.split(" ");
+
+          return {
+            firstName: nameParts[0] || "",
+            lastName: nameParts.slice(1).join(" ") || "",
+          };
+        });
+
+        allClimbers.push(...parsedClimbers);
+      }
 
       const result = {
-        climbers: parsedClimbers,
+        climbers: allClimbers,
         metadata: {
-          totalProcessed: parsedClimbers.length,
+          totalProcessed: allClimbers.length,
           processedAt: new Date(),
-          sourceFiles: [this.inputFile],
+          sourceFiles: sourceFiles,
         },
       };
 
       this.logProgress(
         "parse",
-        `Successfully parsed ${parsedClimbers.length} climbers`
+        `Successfully parsed ${allClimbers.length} climbers from ${fileDataArray.length} files`
       );
       return result;
     } catch (error) {
-      if (error instanceof ProcessingError) {
-        throw error;
-      }
-
-      const errorMsg = `Failed to parse climbers JSON: ${error.message}`;
-      this.logError("parse", error);
-      throw new ProcessingError(
-        errorMsg,
+      throw ErrorHandler.wrapError(
+        error,
         ProcessingError.Categories.PARSE_ERROR,
-        this.sourceName,
-        { originalError: error.message }
+        this.sourceName
       );
     }
   }
@@ -274,67 +302,11 @@ class ClimbersSource extends BaseSource {
   }
 
   /**
-   * Process climbers data with caching support
-   * @returns {Promise<Object>} Processed climbers data with metadata
-   */
-  async process() {
-    const cacheKey = this.getCacheKey();
-
-    // Check cache first if enabled
-    if (this.cacheEnabled && this.cache) {
-      const sourceFiles = this.getSourceFiles();
-      const isSourceNewer = await this.cache.isSourceNewer(
-        cacheKey,
-        sourceFiles
-      );
-
-      if (!isSourceNewer) {
-        const cached = await this.cache.get(cacheKey);
-        if (cached) {
-          const climberCount = cached.climbers ? cached.climbers.length : 0;
-          this.logger.info(
-            `Using cached climbers data (${climberCount} climbers)`
-          );
-          return cached;
-        }
-      } else {
-        this.logger.debug(
-          "Source files are newer than cache, processing fresh data"
-        );
-      }
-    }
-
-    // Process data
-    this.logProgress("process", "Starting climbers data processing");
-
-    const rawData = await this.fetch();
-    const parsedData = await this.parse(rawData);
-    const validatedData = await this.validate(parsedData);
-
-    // Cache result if enabled
-    if (this.cacheEnabled && this.cache) {
-      try {
-        await this.cache.set(cacheKey, validatedData);
-        this.logger.debug(`Cached climbers data with key: ${cacheKey}`);
-      } catch (error) {
-        this.logger.warn("Failed to cache climbers data:", error.message);
-        // Don't fail the entire process if caching fails
-      }
-    }
-
-    this.logProgress(
-      "process",
-      `Successfully processed ${validatedData.climbers.length} climbers`
-    );
-    return validatedData;
-  }
-
-  /**
    * Get source files that this processor depends on
    * @returns {string[]} Array of source file paths
    */
   getSourceFiles() {
-    return [this.inputFile];
+    return this.inputFiles;
   }
 }
 

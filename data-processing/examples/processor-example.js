@@ -32,7 +32,7 @@ async function demonstrateProcessor() {
           climbers: {
             enabled: true,
             config: {
-              inputFile: "tests/fixtures/sample-climbers.json",
+              inputFile: "data-processing/input-data/climbers.json",
             },
           },
         },
@@ -129,13 +129,13 @@ async function demonstrateDependencyResolution() {
           teufelsturmSummits: {
             enabled: true,
             config: {
-              inputFile: "../data-proccessing/output/tt.summits.html",
+              inputFile: "data-processing/input-data/tt.summits.html",
             },
           },
           osmLocations: {
             enabled: true,
             config: {
-              inputFile: "../data-proccessing/input/points.geojson",
+              inputFile: "data-processing/input-data/points.geojson",
               dependencies: ["teufelsturmSummits"],
             },
           },

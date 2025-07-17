@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const routeSchema = new Schema({
-  name:{
+  name: {
     type: String,
-    required: true
+    required: true,
   },
   teufelsturmId: String,
   teufelsturmScore: String,
@@ -14,14 +14,14 @@ const routeSchema = new Schema({
     jump: String,
     RP: String,
     normal: String,
-    withoutSupport: String
+    withoutSupport: String,
   },
   summit: {
     type: Schema.Types.ObjectId,
-    ref: 'Summit',
+    ref: "Summit",
     required: true,
-    index: true
+    index: true,
   },
 });
 
-module.exports = mongoose.model('Route', routeSchema); 
+module.exports = mongoose.model("Route", routeSchema);

@@ -1,50 +1,52 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const ascentSchema = new Schema({
   date: Date,
   route: {
     type: Schema.Types.ObjectId,
-    ref: 'Route',
+    ref: "Route",
     index: true,
   },
-  climbers: [{
-    climber: {
-      type: Schema.Types.ObjectId,
-      ref: 'Climber',
-      index: true,
+  climbers: [
+    {
+      climber: {
+        type: Schema.Types.ObjectId,
+        ref: "Climber",
+        index: true,
+      },
+      isAborted: {
+        type: Boolean,
+        default: false,
+      },
     },
-    isAborted: {
-      type: Boolean,
-      default: false
-    }
-  }],
+  ],
   leadClimber: {
     type: Schema.Types.ObjectId,
-    ref: 'Climber',
+    ref: "Climber",
     default: null,
     index: true,
   },
   isAborted: {
     type: Boolean,
-    default: false
+    default: false,
   },
   isTopRope: {
     type: Boolean,
-    default: false
+    default: false,
   },
   isSolo: {
     type: Boolean,
-    default: false
+    default: false,
   },
   isWithoutSupport: {
     type: Boolean,
-    default: false
+    default: false,
   },
   notes: {
     type: String,
-    default: null
+    default: null,
   },
 });
 
-module.exports = mongoose.model('Ascent', ascentSchema); 
+module.exports = mongoose.model("Ascent", ascentSchema);

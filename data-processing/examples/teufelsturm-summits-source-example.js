@@ -21,9 +21,9 @@ async function main() {
     logger,
   });
 
-  // Simple configuration - using one of the existing HTML files for demo
+  // Simple configuration - using the input data file
   const config = {
-    inputFile: "../data-proccessing/output/tt.summits.html",
+    inputFile: "input-data/tt.summits.html",
   };
 
   try {

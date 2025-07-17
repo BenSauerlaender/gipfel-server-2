@@ -30,10 +30,7 @@ async function main() {
 
   // Simple configuration
   const config = {
-    inputFiles: [
-      "../data-proccessing/input/teufelsturm/wege1.html",
-      "../data-proccessing/input/teufelsturm/wege2.html",
-    ],
+    inputFiles: ["input-data/wege1.html", "input-data/wege2.html"],
   };
 
   try {

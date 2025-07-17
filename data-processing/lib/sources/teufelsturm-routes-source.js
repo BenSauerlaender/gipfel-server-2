@@ -2,6 +2,7 @@ const fs = require("fs").promises;
 const cheerio = require("cheerio");
 const BaseSource = require("./base-source");
 const ProcessingError = require("../core/error");
+const ErrorHandler = require("../core/error-handler");
 const fixSummitName = require("../util/fixSummitName");
 
 /**
@@ -9,8 +10,21 @@ const fixSummitName = require("../util/fixSummitName");
  * Processes HTML files from Teufelsturm website to extract climbing route data
  */
 class TeufelsturmRoutesSource extends BaseSource {
-  constructor(config, logger, cache, processor) {
-    super(config, logger, cache, processor);
+  constructor(config, logger, cache = null) {
+    super(config, logger, cache);
+
+    // Validate that input files are configured
+    if (!config.inputFile && !config.inputFiles) {
+      throw new ProcessingError(
+        "TeufelsturmRoutesSource requires either inputFile or inputFiles to be configured",
+        ProcessingError.Categories.CONFIG_ERROR,
+        this.sourceName,
+        { config }
+      );
+    }
+
+    // Always use inputFiles array, wrap single file if needed
+    this.inputFiles = config.inputFiles || [config.inputFile];
 
     // Difficulty scales and mappings from original script
     this.JUMP_SCALA = ["1", "2", "3", "4", "5"];
@@ -53,15 +67,15 @@ class TeufelsturmRoutesSource extends BaseSource {
 
   /**
    * Fetch HTML content from configured input files
+   * @param {Object} dependencies - Resolved dependency data (unused by this source)
    * @returns {Promise<Array>} Array of {filePath, content} objects
    */
-  async fetch() {
+  async fetch(dependencies = {}) {
     this.logProgress("fetch", "Loading HTML files");
 
-    const inputFiles = this.config.inputFiles || [];
     const results = [];
 
-    for (const filePath of inputFiles) {
+    for (const filePath of this.inputFiles) {
       try {
         this.logger.debug(`Reading file: ${filePath}`);
         const content = await fs.readFile(filePath, "utf8");
@@ -71,11 +85,11 @@ class TeufelsturmRoutesSource extends BaseSource {
           this.logger.warn(`File not found: ${filePath}`);
           continue;
         }
-        throw new ProcessingError(
-          `Failed to read file ${filePath}: ${error.message}`,
+        throw ErrorHandler.wrapError(
+          error,
           ProcessingError.Categories.SOURCE_ERROR,
           this.sourceName,
-          { filePath, error: error.message }
+          { filePath }
         );
       }
     }
@@ -85,7 +99,7 @@ class TeufelsturmRoutesSource extends BaseSource {
         "No HTML files could be loaded",
         ProcessingError.Categories.SOURCE_ERROR,
         this.sourceName,
-        { inputFiles }
+        { inputFiles: this.inputFiles }
       );
     }
 
@@ -96,9 +110,10 @@ class TeufelsturmRoutesSource extends BaseSource {
   /**
    * Parse HTML content to extract route data
    * @param {Array} htmlFiles - Array of {filePath, content} objects
+   * @param {Object} dependencies - Resolved dependency data (unused by this source)
    * @returns {Promise<Object>} Parsed route data with regions, summits, and routes
    */
-  async parse(htmlFiles) {
+  async parse(htmlFiles, dependencies = {}) {
     this.logProgress("parse", "Parsing HTML content");
 
     let allRoutes = [];
@@ -510,51 +525,6 @@ class TeufelsturmRoutesSource extends BaseSource {
   }
 
   /**
-   * Process data with caching support
-   * @returns {Promise<Object>} Processed data
-   */
-  async process() {
-    const cacheKey = this.getCacheKey();
-
-    // Check cache first
-    if (this.cacheEnabled && this.cache) {
-      const sourceFiles = this.getSourceFiles();
-      const isSourceNewer = await this.cache.isSourceNewer(
-        cacheKey,
-        sourceFiles
-      );
-
-      if (!isSourceNewer) {
-        const cached = await this.cache.get(cacheKey);
-        if (cached) {
-          this.logger.debug(`Using cached data for ${this.sourceName}`);
-          return cached;
-        }
-      }
-    }
-
-    // Process data
-    this.logProgress("process", "Starting data processing");
-    const rawData = await this.fetch();
-    const parsedData = await this.parse(rawData);
-    const validatedData = await this.validate(parsedData);
-
-    // Cache result
-    if (this.cacheEnabled && this.cache) {
-      try {
-        await this.cache.set(cacheKey, validatedData);
-        this.logger.debug(`Cached data with key: ${cacheKey}`);
-      } catch (error) {
-        this.logger.warn("Failed to cache data:", error.message);
-        // Don't fail the entire process if caching fails
-      }
-    }
-
-    this.logProgress("process", "Data processing completed");
-    return validatedData;
-  }
-
-  /**
    * Validate that a route has at least one difficulty set
    * @param {Object} route - Route object to validate
    * @param {string} routeIdentifier - Route identifier for error reporting
@@ -636,7 +606,7 @@ class TeufelsturmRoutesSource extends BaseSource {
    * @returns {Array} Array of source file paths
    */
   getSourceFiles() {
-    return this.config.inputFiles || [];
+    return this.inputFiles;
   }
 }
 

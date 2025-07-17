@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Test Route 1",
+    "summit": "Test Summit",
+    "teufelsturmId": "1234",
+    "teufelsturmScore": "1",
+    "stars": 1,
+    "difficulty": {
+      "normal": "V"
+    }
+  },
+  {
+    "name": "Test Route 2",
+    "summit": "Test Summit",
+    "teufelsturmId": "5678",
+    "teufelsturmScore": "0",
+    "stars": 2,
+    "difficulty": {
+      "normal": "VI",
+      "RP": "VIIa"
+    }
+  },
+  {
+    "name": "Jump Route",
+    "summit": "Another Summit",
+    "teufelsturmId": "9012",
+    "teufelsturmScore": "-1",
+    "stars": 0,
+    "difficulty": {
+      "jump": "3"
+    }
+  },
+  {
+    "name": "Without Support Route",
+    "summit": "Another Summit",
+    "teufelsturmId": "3456",
+    "teufelsturmScore": "2",
+    "stars": 1,
+    "unsecure": true,
+    "difficulty": {
+      "withoutSupport": "VIIb"
+    }
+  }
+]

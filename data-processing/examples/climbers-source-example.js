@@ -23,7 +23,7 @@ async function runClimbersExample() {
 
   // Simple configuration
   const config = {
-    inputFile: "../data-proccessing/input/climbers.json",
+    inputFile: "input-data/climbers.json",
   };
 
   try {

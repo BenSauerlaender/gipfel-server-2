@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const ProcessingError = require("../core/error");
+const ErrorHandler = require("../core/error-handler");
 
 /**
  * Base class for all data source handlers
