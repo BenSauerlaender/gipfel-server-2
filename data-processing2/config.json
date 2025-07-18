@@ -1,0 +1,49 @@
+{
+  "cacheDir": "cache",
+  "importers": {
+    "teufelsturmSummits": {
+      "config": {
+        "inputFiles": ["input-data/tt.summits.html"]
+      }
+    },
+    "teufelsturmRoutes": {
+      "config": {
+        "inputFiles": ["input-data/wege1.html", "input-data/wege2.html"]
+      }
+    },
+    "osmLocations": {
+      "config": {
+        "inputFiles": ["input-data/points.geojson"]
+      },
+      "dependencies": ["teufelsturmSummits"]
+    },
+    "routesJson": {
+      "config": {
+        "inputFiles": ["input-data/routes.json"]
+      }
+    },
+    "climbersJson": {
+      "config": {
+        "inputFiles": ["input-data/climbers.json"]
+      }
+    },
+    "ascentsJson": {
+      "config": {
+        "inputFiles": ["input-data/ascents.json"]
+      },
+      "dependencies": ["climbersJson"]
+    }
+  },
+  "exporter": {
+    "database": {
+      "modeOptions": ["update", "replace", "insert"],
+      "collections": {
+        "regions": ["teufelsturmSummits"],
+        "summits": ["teufelsturmSummits", "osmLocations"],
+        "routes": ["teufelsturmRoutes", "routesJSON"],
+        "climbers": ["climbersJSON"],
+        "ascents": ["ascentsJSON"]
+      }
+    }
+  }
+}

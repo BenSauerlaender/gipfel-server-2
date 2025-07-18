@@ -6,15 +6,44 @@ const routeSchema = new Schema({
     type: String,
     required: true,
   },
-  teufelsturmId: String,
-  teufelsturmScore: String,
-  unsecure: Boolean,
-  stars: Number,
+  teufelsturmId: {
+    type: Number,
+    min: [0, "teufelsturmId cannot be negative"],
+    validate: {
+      validator: Number.isInteger,
+      message: "teufelsturmId must be an integer",
+    },
+  },
+  teufelsturmScore: {
+    type: Number,
+    min: [-3, "teufelsturmId cannot be below -3"],
+    max: [3, "teufelsturmId cannot be above 3"],
+    validate: {
+      validator: Number.isInteger,
+      message: "teufelsturmId must be an integer",
+    },
+  },
+  unsecure: {
+    type: Boolean,
+    default: false,
+  },
+  stars: {
+    type: Number,
+    min: [0, "stars cannot be negative"],
+    max: [2, "stars cannot be above 2"],
+    validate: {
+      validator: Number.isInteger,
+      message: "stars must be an integer",
+    },
+  },
   difficulty: {
-    jump: String,
-    RP: String,
-    normal: String,
-    withoutSupport: String,
+    type: {
+      jump: String,
+      RP: String,
+      normal: String,
+      withoutSupport: String,
+    },
+    required: true,
   },
   summit: {
     type: Schema.Types.ObjectId,
@@ -23,5 +52,6 @@ const routeSchema = new Schema({
     index: true,
   },
 });
+routeSchema.index({ name: 1, summit: 1 }, { unique: true });
 
 module.exports = mongoose.model("Route", routeSchema);

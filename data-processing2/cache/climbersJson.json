@@ -1,0 +1,83 @@
+{
+  "metadata": {
+    "sourceName": "climbersJson",
+    "processedAt": "2025-07-18T16:31:11.715Z",
+    "warnings": [],
+    "errors": [],
+    "sourceFiles": [
+      "input-data/climbers.json"
+    ],
+    "stats": {
+      "climbersProcessed": 13
+    }
+  },
+  "data": {
+    "climbers": [
+      {
+        "firstName": "Kay",
+        "lastName": "Sauerländer",
+        "abbr": "Kay"
+      },
+      {
+        "firstName": "Ben",
+        "lastName": "Sauerländer",
+        "abbr": "Ben"
+      },
+      {
+        "firstName": "Tom",
+        "lastName": "Sauerländer",
+        "abbr": "Tom"
+      },
+      {
+        "firstName": "Luca",
+        "lastName": "Sauerländer",
+        "abbr": "Luc"
+      },
+      {
+        "firstName": "Can",
+        "lastName": "Kentner",
+        "abbr": "Can"
+      },
+      {
+        "firstName": "Holger",
+        "lastName": "Sauerländer",
+        "abbr": "Hol"
+      },
+      {
+        "firstName": "Judith",
+        "lastName": "Sauerländer",
+        "abbr": "Jud"
+      },
+      {
+        "firstName": "Phillipp",
+        "lastName": "Sauerländer",
+        "abbr": "Phi"
+      },
+      {
+        "firstName": "Andreas",
+        "lastName": "?",
+        "abbr": "And"
+      },
+      {
+        "firstName": "Ive",
+        "lastName": "?",
+        "abbr": "Ive"
+      },
+      {
+        "firstName": "Hannah",
+        "lastName": "Sauerländer",
+        "abbr": "Han"
+      },
+      {
+        "firstName": "Carla",
+        "lastName": "Sauerländer",
+        "abbr": "Car"
+      },
+      {
+        "firstName": "Vincent",
+        "lastName": "Sauerländer",
+        "abbr": "Vin"
+      }
+    ]
+  }
+}
