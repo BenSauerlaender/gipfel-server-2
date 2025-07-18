@@ -1,4 +1,4 @@
-const AscentJsonImporter = require("./data-processing2/importers/ascentsJsonImporter");
+const AscentJsonImporter = require("./data-processing/db-pipeline/importers/ascentsJsonImporter");
 
 // Mock logger
 const logger = {

@@ -142,8 +142,7 @@ data/
 *.osm.mbtiles
 tiles/
 
-data-proccessing/input
-data-proccessing/output
-data-proccessing/tmp
-
-data-processing/cache
+data-processing/tmp/*
+dump/*
+data-processing/output-static-data/*
+data-processing/input-data/*
