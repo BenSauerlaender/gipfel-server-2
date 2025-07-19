@@ -1,44 +1,47 @@
 {
-  "cacheDir": "cache",
+  "cacheDir": "../tmp/db-cache",
   "clearCacheOnStart": false,
   "logLevel": "info",
   "importers": {
     "teufelsturmSummits": {
       "config": {
-        "inputFiles": ["input-data/tt.summits.html"]
+        "inputFiles": ["../input-data/teufelsturm/gipfel.html"]
       }
     },
     "teufelsturmRoutes": {
       "config": {
-        "inputFiles": ["input-data/wege1.html", "input-data/wege2.html"]
+        "inputFiles": [
+          "../input-data/teufelsturm/wege1.html",
+          "../input-data/teufelsturm/wege2.html"
+        ]
       }
     },
     "osmLocations": {
       "config": {
-        "inputFiles": ["input-data/points.geojson"]
+        "inputFiles": ["../input-data/manual-db/points.geojson"]
       },
       "dependencies": ["teufelsturmSummits"]
     },
     "routesJson": {
       "config": {
-        "inputFiles": ["input-data/routes.json"]
+        "inputFiles": ["../input-data/manual-db/routes.json"]
       }
     },
     "climbersJson": {
       "config": {
-        "inputFiles": ["input-data/climbers.json"]
+        "inputFiles": ["../input-data/manual-db/climbers.json"]
       }
     },
     "ascentsJson": {
       "config": {
-        "inputFiles": ["input-data/ascents.json"]
+        "inputFiles": ["../input-data/manual-db/ascents.json"]
       },
       "dependencies": ["climbersJson"]
     }
   },
   "databaseExporter": {
     "database": "test2",
-    "mode": "update",
+    "mode": "replace",
     "modeOptions": ["update", "replace", "insert"],
     "collections": {
       "regions": ["teufelsturmSummits"],

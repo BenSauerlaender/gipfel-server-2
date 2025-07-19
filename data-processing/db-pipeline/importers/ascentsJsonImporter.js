@@ -193,6 +193,13 @@ class AscentJsonImporter {
       warnings.push(...climbersResult.warnings);
     }
 
+    // Process summit (required)
+    const summitResult = this.processSummit(rawAscent.summit, index);
+    if (summitResult.error) {
+      return { error: summitResult.error };
+    }
+
+    ascent.summit = summitResult.summit;
     // Process route (required)
     const routeResult = this.processRoute(rawAscent.route, index);
     if (routeResult.error) {
@@ -295,6 +302,24 @@ class AscentJsonImporter {
       climbers: climbersResult.climbers,
       warnings: climbersResult.warnings,
     };
+  }
+
+  processSummit(summitData, index) {
+    if (
+      !summitData ||
+      typeof summitData !== "string" ||
+      summitData.trim() === ""
+    ) {
+      return {
+        error: {
+          type: "INVALID_SUMMIT",
+          ascentIndex: index,
+          message: "Summit must be a non-empty string",
+          value: summitData,
+        },
+      };
+    }
+    return { summit: summitData.trim() };
   }
 
   processRoute(routeData, index) {

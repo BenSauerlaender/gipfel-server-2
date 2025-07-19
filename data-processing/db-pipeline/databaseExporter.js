@@ -8,6 +8,7 @@ const Summit = require("../../src/models/Summit");
 const Route = require("../../src/models/Route");
 const Climber = require("../../src/models/Climber");
 const Ascent = require("../../src/models/Ascent");
+const LastChange = require("../../src/models/LastChange");
 
 class DatabaseExporter {
   constructor(config, logger) {
@@ -118,6 +119,11 @@ class DatabaseExporter {
           failed: gpsStats.failed,
         };
       }
+    }
+
+    // Update the LastChange collection if the collection was modified
+    if (stats.inserted > 0 || stats.updated > 0 || stats.replaced > 0) {
+      await this.updateLastChange(collectionName);
     }
 
     // Summary table
@@ -457,13 +463,29 @@ class DatabaseExporter {
       switch (collectionName) {
         case "ascents":
           // Resolve route
-          if (item.route) {
-            const route = await Route.findOne({ name: item.route });
+          if (item.route && item.summit) {
+            const summit = await Summit.findOne({ name: item.summit });
+            if (!summit) {
+              logger.warn(`Summit not found: ${item.summit}`);
+              return null;
+            }
+            const summitId = summit._id;
+            const route = await Route.findOne({
+              name: item.route,
+              summit: summitId,
+            });
             if (!route) {
-              logger.warn(`Route not found: ${item.route}`);
+              logger.warn(
+                `Route not found: ${item.route} on summit: ${item.summit}`
+              );
               return null;
             }
             resolvedItem.route = route._id;
+          } else if (item.route) {
+            logger.warn(
+              `Route/Summit information missing for route: ${item.route}`
+            );
+            return null;
           }
 
           // Resolve climbers
@@ -644,6 +666,24 @@ class DatabaseExporter {
     this.logger.summary(
       "═══════════════════════════════════════════════════════════════════════════════"
     );
+  }
+
+  // Add a new method to update the LastChange collection
+  async updateLastChange(collectionName) {
+    try {
+      const now = new Date();
+      await LastChange.updateOne(
+        { collectionName },
+        { $set: { lastModified: now } },
+        { upsert: true } // Create the document if it doesn't exist
+      );
+      this.logger.info(`Updated LastChange for collection: ${collectionName}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to update LastChange for collection: ${collectionName}`,
+        error.message
+      );
+    }
   }
 }
 
