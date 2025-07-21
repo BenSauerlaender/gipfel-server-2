@@ -265,10 +265,15 @@ class TeufelsturmRoutesImporter {
 
       const score = this.mapScore(imgSrc);
       if (score === undefined) {
-        return { error: { type: "SCORE_MAPPING_FAILED", rowIndex, imgSrc } };
+        return {
+          error: {
+            type: "INVALID_SCORE",
+            rowIndex,
+            message: `Invalid score image source: ${imgSrc}`,
+          },
+        };
       }
-
-      return { score };
+      return { score: String(score) }; // Ensure score is saved as a string
     } catch (error) {
       return {
         error: {

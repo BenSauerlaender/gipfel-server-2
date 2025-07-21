@@ -5,7 +5,8 @@
   "importers": {
     "teufelsturmSummits": {
       "config": {
-        "inputFiles": ["../input-data/teufelsturm/gipfel.html"]
+        "inputFiles": ["../input-data/teufelsturm/gipfel.html"],
+        "regionsAbbrMap": "../input-data/manual-db/regionsAbbr.json"
       }
     },
     "teufelsturmRoutes": {

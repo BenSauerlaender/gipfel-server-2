@@ -72,11 +72,9 @@ These resources must be present for the map server to function correctly. After 
 
 # TODO
 
-- fix Ivi name
-- fix dataImport
-- fix mongo connector
-- add dbSync
-- add db backup
+- improve db-sync to only do dumps
+- also add a silient mode
+- implement and test the data-processing sh scripts
 
 ## Data Generation pipeline _!_
 
@@ -135,7 +133,6 @@ These resources must be present for the map server to function correctly. After 
 ## Ascent notes
 
 - Zwergfels => Zwerg (maybe fix)
-- Kuchenturm, Septemberweg existiert nicht
 - inconsistency: Schildkroete, W-Kante (statt Westkante) in der DB
 - inconsistency: "Lokomotive-Dom" vs. "Lokomotive - Esse"
 

@@ -47,7 +47,19 @@ class TeufelsturmSummitsImporter {
     // Remove duplicate summits
     const deduplicatedSummits = this.removeDuplicates(allSummits, errors);
 
-    const regions = Array.from(regionSet).map((name) => ({ name }));
+    const regionsAbbrMap = JSON.parse(
+      fs.readFileSync(config.regionsAbbrMap, "utf8")
+    );
+    const regions = Array.from(regionSet).map((name) => {
+      const abbr = regionsAbbrMap[name] || null;
+      if (!abbr) {
+        warnings.push({
+          type: "MISSING_REGION_ABBR",
+          regionName: name,
+        });
+      }
+      return { name, abbr };
+    });
 
     this.logger.info(
       `Successfully processed ${deduplicatedSummits.length} summits (${allSummits.length - deduplicatedSummits.length} duplicates removed)`
@@ -68,7 +80,7 @@ class TeufelsturmSummitsImporter {
       },
       data: {
         summits: deduplicatedSummits,
-        regions: regions,
+        regions: regions, // Include regions with abbreviations
       },
     };
   }
