@@ -8,11 +8,15 @@ const TeufelsturmRoutesImporter = require("./importers/teufelsturmRoutesImporter
 const OsmLocationsImporter = require("./importers/osmLocationsImporter");
 const routesJsonImporter = require("./importers/routesJsonImporter");
 const DatabaseExporter = require("./databaseExporter");
+const { log } = require("console");
 
 class DataProcessor {
   constructor(config) {
     this.config = this.resolveConfigPaths(config);
-    this.logger = new Logger({ level: this.config.logLevel || "info" });
+    this.logger = new Logger({
+      level: this.config.logLevel || "info",
+      logFile: this.config.logFile || null,
+    });
     this.registeredImporters = {};
     this.importedData = {};
     this.cacheDir = this.config.cacheDir || path.resolve(__dirname, "cache");
@@ -261,6 +265,9 @@ class DataProcessor {
         resolvedConfig.cacheDir
       );
     }
+    if (resolvedConfig.logFile) {
+      resolvedConfig.logFile = path.resolve(__dirname, resolvedConfig.logFile);
+    }
 
     // Resolve input file paths for all importers
     if (resolvedConfig.importers) {
@@ -271,6 +278,12 @@ class DataProcessor {
             importerConfig.config.inputFiles.map((filePath) =>
               path.resolve(__dirname, filePath)
             );
+        }
+        if (importerConfig.config && importerConfig.config.regionsAbbrMap) {
+          importerConfig.config.regionsAbbrMap = path.resolve(
+            __dirname,
+            importerConfig.config.regionsAbbrMap
+          );
         }
       });
     }

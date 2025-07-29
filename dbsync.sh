@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Usage:
-# ./dbsync.sh push|pull --local-db <local_db_name> --remote-db <remote_db_name> [--fresh]
+# ./dbsync.sh push|pull --local-db <local_db_name> --remote-db <remote_db_name> [--fresh] [--no-user]
 # Example:
-# ./dbsync.sh push --local-db dev --remote-db gipfelapp --fresh
-# ./dbsync.sh pull --local-db dev --remote-db gipfelapp
+# ./dbsync.sh push --local-db dev --remote-db gipfelapp --fresh --no-user
+# ./dbsync.sh pull --local-db dev --remote-db gipfelapp --no-user
 
 # Reads remote SSH host alias from .env file in the same directory.
 # Expected .env key:
@@ -54,12 +54,23 @@ drop_remote_db() {
 }
 
 restore_local() {
-    mongorestore --db "$LOCAL_DB" --drop "$TMP_DIR/remote_dump_$REMOTE_DB/$REMOTE_DB"
+    if [[ "$NO_USER" == "1" ]]; then
+        echo "Restoring local database '$LOCAL_DB' without the User collection due to --no-user flag"
+        mongorestore --db "$LOCAL_DB" --drop --excludeCollection users "$TMP_DIR/remote_dump_$REMOTE_DB/$REMOTE_DB"
+    else
+        mongorestore --db "$LOCAL_DB" --drop "$TMP_DIR/remote_dump_$REMOTE_DB/$REMOTE_DB"
+    fi
 }
 
 restore_remote() {
-    scp -r "$TMP_DIR/local_dump_$LOCAL_DB/$LOCAL_DB" "$REMOTE:/tmp/local_dump_$LOCAL_DB"
-    ssh "$REMOTE" "mongorestore --db $REMOTE_DB --drop /tmp/local_dump_$LOCAL_DB"
+    if [[ "$NO_USER" == "1" ]]; then
+        echo "Restoring remote database '$REMOTE_DB' without the User collection due to --no-user flag"
+        scp -r "$TMP_DIR/local_dump_$LOCAL_DB/$LOCAL_DB" "$REMOTE:/tmp/local_dump_$LOCAL_DB"
+        ssh "$REMOTE" "mongorestore --db $REMOTE_DB --drop --excludeCollection users /tmp/local_dump_$LOCAL_DB"
+    else
+        scp -r "$TMP_DIR/local_dump_$LOCAL_DB/$LOCAL_DB" "$REMOTE:/tmp/local_dump_$LOCAL_DB"
+        ssh "$REMOTE" "mongorestore --db $REMOTE_DB --drop /tmp/local_dump_$LOCAL_DB"
+    fi
 }
 
 dump_local() {
@@ -75,6 +86,8 @@ dump_remote() {
 MODE="$1"
 shift
 
+NO_USER=0
+
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --local-db)
@@ -89,6 +102,10 @@ while [[ "$#" -gt 0 ]]; do
             FRESH=1
             shift
             ;;
+        --no-user)
+            NO_USER=1
+            shift
+            ;;
         *)
             echo "Unknown parameter passed: $1"
             exit 1
@@ -97,7 +114,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 if [[ -z "$MODE" || -z "$LOCAL_DB" || -z "$REMOTE_DB" ]]; then
-    echo "Usage: $0 push|pull --local-db <local_db_name> --remote-db <remote_db_name> [--fresh]"
+    echo "Usage: $0 push|pull --local-db <local_db_name> --remote-db <remote_db_name> [--fresh] [--no-user]"
     exit 1
 fi
 
@@ -107,7 +124,12 @@ if [[ "$MODE" == "push" ]]; then
     backup_local
     dump_local
     if [[ "$FRESH" == "1" ]]; then
-        drop_remote_db
+        if [[ "$NO_USER" == "1" ]]; then
+            echo "Skipping User collection deletion on remote due to --no-user flag"
+            ssh "$REMOTE" "mongosh --eval \"db.getSiblingDB('$REMOTE_DB').getCollectionNames().filter(c => c !== 'users').forEach(c => db.getSiblingDB('$REMOTE_DB').getCollection(c).drop())\""
+        else
+            drop_remote_db
+        fi
     fi
     restore_remote
 elif [[ "$MODE" == "pull" ]]; then
@@ -115,7 +137,12 @@ elif [[ "$MODE" == "pull" ]]; then
     backup_remote
     dump_remote
     if [[ "$FRESH" == "1" ]]; then
-        drop_local_db
+        if [[ "$NO_USER" == "1" ]]; then
+            echo "Skipping User collection deletion on local due to --no-user flag"
+            mongosh --eval "db.getSiblingDB('$LOCAL_DB').getCollectionNames().filter(c => c !== 'users').forEach(c => db.getSiblingDB('$LOCAL_DB').getCollection(c).drop())"
+        else
+            drop_local_db
+        fi
     fi
     restore_local
 else

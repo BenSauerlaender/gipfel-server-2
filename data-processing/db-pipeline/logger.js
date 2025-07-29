@@ -1,3 +1,6 @@
+const fs = require("fs");
+const path = require("path");
+
 /**
  * Centralized logging utility for the data processing system
  */
@@ -5,12 +8,23 @@ class Logger {
   constructor(options = {}) {
     this.level = options.level || "info";
     this.prefix = options.prefix || "[DataProcessor]";
+    this.logFile = options.logFile || null; // Add logFile option
     this.levels = {
       debug: 0,
       info: 1,
       warn: 2,
       error: 3,
     };
+
+    if (this.logFile) {
+      const logFilePath = path.resolve(this.logFile);
+      if (!fs.existsSync(logFilePath)) {
+        fs.writeFileSync(logFilePath, "", "utf8"); // Create the file if it does not exist
+      } else {
+        fs.writeFileSync(logFilePath, "", "utf8"); // Clear the file if it exists
+      }
+      this.logFilePath = logFilePath;
+    }
   }
 
   /**
@@ -70,6 +84,10 @@ class Logger {
     const timestamp = new Date().toISOString();
     const levelStr = level.toUpperCase().padEnd(5);
     const logMessage = `${timestamp} ${levelStr} ${this.prefix} ${message}`;
+
+    if (this.logFilePath) {
+      fs.appendFileSync(this.logFilePath, logMessage + "\n", "utf8"); // Log to file
+    }
 
     switch (level) {
       case "debug":

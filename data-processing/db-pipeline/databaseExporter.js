@@ -274,8 +274,6 @@ class DatabaseExporter {
         summit.gpsPosition.lng !== newGpsPosition.lng ||
         summit.gpsPosition.lat !== newGpsPosition.lat;
 
-      console.log(summit.gpsPosition, newGpsPosition, hasChanges);
-
       if (hasChanges) {
         await Summit.updateOne(
           { _id: summit._id },

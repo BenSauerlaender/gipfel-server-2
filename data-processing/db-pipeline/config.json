@@ -1,6 +1,7 @@
 {
   "cacheDir": "../tmp/db-cache",
-  "clearCacheOnStart": false,
+  "logFile": "../tmp/db-pipeline.log",
+  "clearCacheOnStart": true,
   "logLevel": "info",
   "importers": {
     "teufelsturmSummits": {
@@ -41,7 +42,7 @@
     }
   },
   "databaseExporter": {
-    "database": "test2",
+    "database": "test",
     "mode": "replace",
     "modeOptions": ["update", "replace", "insert"],
     "collections": {
