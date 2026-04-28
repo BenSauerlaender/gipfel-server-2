@@ -43,7 +43,7 @@
   },
   "databaseExporter": {
     "database": "test",
-    "mode": "replace",
+    "mode": "update",
     "modeOptions": ["update", "replace", "insert"],
     "collections": {
       "regions": ["teufelsturmSummits"],

@@ -6,6 +6,14 @@ docker compose -f docker-compose-mongodb.yml up -d
 start server:
 npm run dev
 
+# Update Ascents
+
+1. get prod database: `./dbsync.sh pull --local-db test --remote-db prod`
+2. add new Ascents to data-processing/input-data/manual-db/ascents.json
+3. run processor: `node data-processing/db-pipeline/run.js`
+4. check changes on local server + frontend
+5. push new database: `./dbsync.sh pull --local-db test --remote-db prod`
+
 # Create Map Resources
 
 This section explains how to generate and organize the map resources for gipfel-server-2.
