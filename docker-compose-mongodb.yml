@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   mongodb:
     image: mongo:6.0
@@ -9,10 +8,10 @@ services:
     environment:
       MONGO_INITDB_DATABASE: gipfel-server
     ports:
-      - '27017:27017'
+      - "27017:27017"
     volumes:
       - mongo_data:/data/db
     command: ["--replSet", "rs0", "--noauth"]
 
 volumes:
-  mongo_data: 
+  mongo_data:
