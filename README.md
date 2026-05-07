@@ -12,7 +12,7 @@ npm run dev
 2. add new Ascents to data-processing/input-data/manual-db/ascents.json
 3. run processor: `node data-processing/db-pipeline/run.js`
 4. check changes on local server + frontend
-5. push new database: `./dbsync.sh pull --local-db test --remote-db prod`
+5. push new database: `./dbsync.sh push --local-db test --remote-db prod`
 
 # Create Map Resources
 
