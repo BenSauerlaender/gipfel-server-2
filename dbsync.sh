@@ -66,10 +66,10 @@ restore_remote() {
     if [[ "$NO_USER" == "1" ]]; then
         echo "Restoring remote database '$REMOTE_DB' without the User collection due to --no-user flag"
         scp -r "$TMP_DIR/local_dump_$LOCAL_DB/$LOCAL_DB" "$REMOTE:/tmp/local_dump_$LOCAL_DB"
-        ssh "$REMOTE" "mongorestore --db $REMOTE_DB --drop --excludeCollection users /tmp/local_dump_$LOCAL_DB"
+        ssh "$REMOTE" "mongorestore --db $REMOTE_DB --drop --excludeCollection users /tmp/local_dump_$LOCAL_DB/$LOCAL_DB"
     else
         scp -r "$TMP_DIR/local_dump_$LOCAL_DB/$LOCAL_DB" "$REMOTE:/tmp/local_dump_$LOCAL_DB"
-        ssh "$REMOTE" "mongorestore --db $REMOTE_DB --drop /tmp/local_dump_$LOCAL_DB"
+        ssh "$REMOTE" "mongorestore --db $REMOTE_DB --drop /tmp/local_dump_$LOCAL_DB/$LOCAL_DB"
     fi
 }
 
@@ -121,7 +121,7 @@ fi
 # Main Logic
 if [[ "$MODE" == "push" ]]; then
     echo "Pushing local database '$LOCAL_DB' to remote '$REMOTE' as '$REMOTE_DB'"
-    backup_local
+    backup_remote
     dump_local
     if [[ "$FRESH" == "1" ]]; then
         if [[ "$NO_USER" == "1" ]]; then
@@ -134,7 +134,7 @@ if [[ "$MODE" == "push" ]]; then
     restore_remote
 elif [[ "$MODE" == "pull" ]]; then
     echo "Pulling remote database '$REMOTE_DB' from '$REMOTE' to local '$LOCAL_DB'"
-    backup_remote
+    backup_local
     dump_remote
     if [[ "$FRESH" == "1" ]]; then
         if [[ "$NO_USER" == "1" ]]; then
