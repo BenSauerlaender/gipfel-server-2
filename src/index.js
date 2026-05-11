@@ -11,6 +11,7 @@ const generateMongoUri = require('./utill/mongoUri');
 const mapRoutes = require('./routes/mapResources');
 const apiRoutes = require('./routes/api');
 const authRoutes = require('./routes/auth');
+const ascentRoutes = require('./routes/ascent');
 const adminRoutes = require('./routes/admin');
 
 const { authenticate, isAdmin } = require('./middleware/auth');
@@ -51,6 +52,7 @@ app.get('/auth-nginx', authenticate, (req, res) => res.sendStatus(200));
 
 app.use('/api/resources', authenticate, apiRoutes);
 app.use('/api/resources/map', authenticate, mapRoutes); //only for development prod routes /api/resources/map/ to nginx
+app.use('/api/ascent', authenticate, isAdmin, ascentRoutes);
 
 app.use('/api/admin', authenticate, isAdmin, adminRoutes);
 
